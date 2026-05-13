@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eze Goodness — Full-Stack Developer & Prompt Engineer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary: #FFA94D;
+            --primary-light: #FFB366;
+            --primary-glow: rgba(255, 169, 77, 0.3);
+            --secondary: #1a1a2e;
+            --accent: #7B68EE;
+            --bg: #FAFAF8;
+            --surface: #FFFFFF;
+            --surface-hover: #F5F5F3;
+            --text: #1a1a2e;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -1px rgba(0,0,0,.03);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,.08),0 10px 10px -5px rgba(0,0,0,.02);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+            --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        [data-theme="dark"] {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface-hover: #1a1a24;
+            --text: #E2E8F0;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border: #1e1e2e;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,.3),0 2px 4px -1px rgba(0,0,0,.2);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,.4),0 10px 10px -5px rgba(0,0,0,.3);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Sora',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:var(--transition);overflow-x:hidden;}
+        .ambient-bg{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden;}
+        .ambient-bg::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 70%,var(--primary-glow) 0%,transparent 50%),radial-gradient(circle at 70% 30%,rgba(123,104,238,.08) 0%,transparent 50%);animation:ambientMove 20s ease-in-out infinite;}
+        [data-theme="dark"] .ambient-bg::before{background:radial-gradient(circle at 30% 70%,rgba(255,169,77,.08) 0%,transparent 50%),radial-gradient(circle at 70% 30%,rgba(123,104,238,.05) 0%,transparent 50%);}
+        @keyframes ambientMove{0%,100%{transform:translate(0,0) rotate(0deg);}33%{transform:translate(2%,2%) rotate(1deg);}66%{transform:translate(-1%,1%) rotate(-1deg);}}
+        .header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 1.5rem;background:rgba(255,255,255,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;transition:var(--transition);}
+        [data-theme="dark"] .header{background:rgba(18,18,26,.8);}
+        .brand{display:flex;align-items:center;gap:.75rem;}
+        .brand-icon{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--primary);box-shadow:0 2px 8px var(--primary-glow);animation:pulse 3s ease-in-out infinite;}
+        .brand-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+        @keyframes pulse{0%,100%{box-shadow:0 2px 8px var(--primary-glow);}50%{box-shadow:0 2px 20px var(--primary-glow),0 0 40px rgba(255,169,77,.15);}}
+        .brand-text{font-weight:600;font-size:1rem;letter-spacing:-.02em;}
+        .brand-sub{font-size:.72rem;color:var(--text-muted);font-weight:400;}
+        .status-indicator{display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary);}
+        .status-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;position:relative;}
+        .status-dot::after{content:'';position:absolute;inset:-2px;border-radius:50%;border:2px solid #22c55e;animation:statusPulse 2s ease-out infinite;}
+        @keyframes statusPulse{0%{transform:scale(1);opacity:1;}100%{transform:scale(2);opacity:0;}}
+        .header-actions{display:flex;gap:.75rem;align-items:center;}
+        .btn-icon{width:38px;height:38px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+        .btn-icon:hover{background:var(--surface-hover);color:var(--text);transform:translateY(-1px);}
+        .btn-icon svg{width:18px;height:18px;}
+        .chat-container{flex:1;display:flex;flex-direction:column;max-width:800px;width:100%;margin:0 auto;padding:80px 1rem 170px;position:relative;z-index:1;}
+        .messages{flex:1;display:flex;flex-direction:column;gap:1.5rem;overflow-y:auto;scroll-behavior:smooth;}
+        .message{display:flex;gap:.875rem;animation:messageIn .4s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(12px);}
+        @keyframes messageIn{to{opacity:1;transform:translateY(0);}}
+        .message.user{flex-direction:row-reverse;}
+        .avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;}
+        .avatar.ai{background:transparent;overflow:hidden;border:2px solid var(--primary);box-shadow:0 2px 8px var(--primary-glow);}
+        .avatar.ai img{width:100%;height:100%;object-fit:cover;display:block;}
+        .avatar.user{background:var(--surface-hover);color:var(--text-secondary);border:1px solid var(--border);}
+        .message-content{max-width:85%;padding:.875rem 1.125rem;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);line-height:1.6;font-size:.95rem;position:relative;}
+        .message.user .message-content{background:linear-gradient(135deg,var(--primary),#FF8C42);color:white;border:none;}
+        .message.ai .message-content{border-top-left-radius:4px;}
+        .message.user .message-content{border-top-right-radius:4px;}
+        .typing-indicator{display:flex;gap:.35rem;padding:1rem 1.125rem;}
+        .typing-indicator span{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:typingBounce 1.4s ease-in-out infinite;}
+        .typing-indicator span:nth-child(2){animation-delay:.2s;}
+        .typing-indicator span:nth-child(3){animation-delay:.4s;}
+        @keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+        .thinking{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;font-size:.85rem;color:var(--text-muted);font-style:italic;}
+        .thinking-dots{display:flex;gap:.2rem;}
+        .thinking-dots span{width:4px;height:4px;background:var(--text-muted);border-radius:50%;animation:thinkingPulse 1.5s ease-in-out infinite;}
+        .thinking-dots span:nth-child(2){animation-delay:.3s;}
+        .thinking-dots span:nth-child(3){animation-delay:.6s;}
+        @keyframes thinkingPulse{0%,100%{opacity:.3;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
+        .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.875rem;margin-top:.75rem;}
+        .card{background:var(--surface-hover);border:1px solid var(--border);border-radius:var(--radius-xs);padding:1rem;transition:var(--transition);cursor:pointer;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:block;}
+        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));transform:scaleX(0);transition:transform .3s ease;}
+        .card:hover::before{transform:scaleX(1);}
+        .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--primary);}
+        .card-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary-glow),rgba(123,104,238,.1));border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;color:var(--primary);}
+        .card-icon svg{width:22px;height:22px;}
+        .card-title{font-weight:600;font-size:.9rem;margin-bottom:.25rem;}
+        .card-desc{font-size:.8rem;color:var(--text-secondary);line-height:1.4;}
+        .card-tags{display:flex;gap:.35rem;margin-top:.75rem;flex-wrap:wrap;}
+        .tag{font-size:.7rem;padding:.2rem .5rem;background:var(--primary-glow);color:var(--primary);border-radius:4px;font-weight:500;font-family:'JetBrains Mono',monospace;}
+        .card-link{display:inline-flex;align-items:center;gap:.3rem;margin-top:.75rem;font-size:.8rem;color:var(--primary);font-weight:500;}
+        .card-link svg{width:14px;height:14px;}
+        .skill-item{margin-bottom:.875rem;}
+        .skill-header{display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.85rem;}
+        .skill-name{font-weight:500;}
+        .skill-level{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:.8rem;}
+        .skill-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+        .skill-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width 1s cubic-bezier(.16,1,.3,1);width:0;}
+        .contact-form{display:flex;flex-direction:column;gap:.75rem;margin-top:.75rem;}
+        .form-group{display:flex;flex-direction:column;gap:.35rem;}
+        .form-label{font-size:.8rem;font-weight:500;color:var(--text-secondary);}
+        .form-input{padding:.625rem .875rem;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;transition:var(--transition);outline:none;}
+        .form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
+        .form-input::placeholder{color:var(--text-muted);}
+        input[type="date"]{color-scheme:light;}
+        [data-theme="dark"] input[type="date"]{color-scheme:dark;}
+        textarea.form-input{resize:vertical;min-height:80px;}
+        .btn-primary{padding:.625rem 1.25rem;background:linear-gradient(135deg,var(--primary),#FF8C42);color:white;border:none;border-radius:var(--radius-xs);font-weight:600;font-size:.9rem;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:inherit;}
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--primary-glow);}
+        .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+        .btn-primary svg{width:16px;height:16px;}
+        .quick-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;}
+        .quick-btn{padding:.5rem 1rem;background:var(--surface-hover);border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);font-size:.85rem;cursor:pointer;transition:var(--transition);font-family:inherit;display:inline-flex;align-items:center;gap:.4rem;}
+        .quick-btn:hover{background:var(--primary-glow);border-color:var(--primary);color:var(--primary);transform:translateY(-1px);}
+        .quick-btn svg{width:14px;height:14px;}
+        .input-area{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:1rem 1.5rem 1.5rem;background:linear-gradient(to top,var(--bg) 80%,transparent);}
+        .suggestions-row{max-width:800px;margin:0 auto 0.5rem;display:flex;gap:.5rem;overflow-x:auto;scrollbar-width:none;}
+        .suggestions-row::-webkit-scrollbar{display:none;}
+        .suggestion-chip{white-space:nowrap;padding:.5rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);font-size:.85rem;cursor:pointer;transition:var(--transition);font-family:inherit;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0;}
+        .suggestion-chip:hover{background:var(--primary-glow);border-color:var(--primary);color:var(--primary);transform:translateY(-1px);}
+        .suggestion-chip svg{width:14px;height:14px;}
+        .input-wrapper{max-width:800px;margin:0 auto;display:flex;gap:.75rem;align-items:flex-end;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;box-shadow:var(--shadow-lg);transition:var(--transition);}
+        .input-wrapper:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow),var(--shadow-lg);}
+        .chat-input{flex:1;border:none;background:transparent;color:var(--text);font-family:inherit;font-size:.95rem;resize:none;outline:none;max-height:120px;min-height:24px;line-height:1.5;}
+        .chat-input::placeholder{color:var(--text-muted);}
+        .send-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#FF8C42);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);flex-shrink:0;}
+        .send-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px var(--primary-glow);}
+        .send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+        .send-btn svg{width:18px;height:18px;}
+        .voice-btn{width:36px;height:36px;border-radius:50%;background:var(--surface-hover);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);flex-shrink:0;}
+        .voice-btn:hover{background:var(--primary-glow);color:var(--primary);}
+        .voice-btn.recording{background:#ef4444;color:white;animation:recordingPulse 1.5s ease-in-out infinite;}
+        .voice-btn svg{width:18px;height:18px;}
+        @keyframes recordingPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+        .timeline{position:relative;padding-left:1.5rem;margin-top:.75rem;}
+        .timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--primary),var(--accent));border-radius:1px;}
+        .timeline-item{position:relative;padding-bottom:1.25rem;}
+        .timeline-item::before{content:'';position:absolute;left:-1.25rem;top:.35rem;width:10px;height:10px;background:var(--primary);border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 2px var(--primary);}
+        .timeline-date{font-size:.75rem;color:var(--primary);font-weight:600;font-family:'JetBrains Mono',monospace;margin-bottom:.25rem;}
+        .timeline-title{font-weight:600;font-size:.9rem;margin-bottom:.2rem;}
+        .timeline-desc{font-size:.85rem;color:var(--text-secondary);line-height:1.4;}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;margin-top:.75rem;}
+        .stat-box{text-align:center;padding:1rem;background:var(--surface-hover);border-radius:var(--radius-xs);border:1px solid var(--border);}
+        .stat-number{font-size:1.5rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .stat-label{font-size:.75rem;color:var(--text-secondary);margin-top:.25rem;}
+        .social-links{display:flex;gap:.75rem;margin-top:.75rem;flex-wrap:wrap;}
+        .social-link{display:flex;align-items:center;gap:.5rem;padding:.625rem 1rem;background:var(--surface-hover);border:1px solid var(--border);border-radius:var(--radius-xs);color:var(--text);text-decoration:none;font-size:.85rem;transition:var(--transition);}
+        .social-link:hover{background:var(--primary-glow);border-color:var(--primary);transform:translateY(-1px);}
+        .social-link svg{width:16px;height:16px;}
+        .social-link.whatsapp:hover{background:rgba(37,211,102,.12);border-color:#25D366;color:#25D366;}
+        ::-webkit-scrollbar{width:6px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+        ::-webkit-scrollbar-thumb:hover{background:var(--text-muted);}
+        @media(max-width:640px){
+            .chat-container{padding:80px .75rem 190px;}
+            .card-grid{grid-template-columns:1fr;}
+            .stats-grid{grid-template-columns:repeat(2,1fr);}
+            .message-content{max-width:90%;}
+            .header{padding:.75rem 1rem;}
+            .input-area{padding:.75rem 1rem 1rem;}
+        }
+        .welcome-hero{text-align:center;padding:1.5rem 0 1rem;}
+        .welcome-hero .profile-photo{width:90px;height:90px;border-radius:50%;overflow:hidden;margin:0 auto 1rem;border:3px solid var(--primary);box-shadow:0 0 0 6px var(--primary-glow);}
+        .welcome-hero .profile-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+        .welcome-hero h1{font-size:1.6rem;font-weight:700;margin-bottom:.35rem;background:linear-gradient(135deg,var(--text),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .welcome-hero .role-badges{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:.5rem;}
+        .role-badge{font-size:.72rem;padding:.25rem .65rem;border-radius:20px;background:var(--primary-glow);color:var(--primary);font-weight:600;border:1px solid rgba(255,169,77,.3);}
+        .welcome-hero p{color:var(--text-secondary);font-size:.92rem;}
+        .toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--secondary);color:white;padding:.75rem 1.25rem;border-radius:var(--radius-xs);font-size:.9rem;box-shadow:var(--shadow-lg);opacity:0;transition:all .3s ease;z-index:200;pointer-events:none;white-space:nowrap;}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+        .cursor-blink::after{content:'|';animation:blink 1s step-end infinite;color:var(--primary);margin-left:2px;}
+        @keyframes blink{50%{opacity:0;}}
+        .pypi-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:linear-gradient(135deg,#006dad,#005a8c);color:white;border-radius:var(--radius-xs);font-size:.85rem;font-weight:600;text-decoration:none;margin-top:.75rem;transition:var(--transition);}
+        .pypi-badge:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,109,173,.3);}
+        .project-category{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);font-weight:700;margin-bottom:.5rem;}
+        [data-theme="dark"] .message.ai .message-content{box-shadow:0 4px 6px -1px rgba(0,0,0,.4),0 0 20px rgba(255,169,77,.05);}
+        [data-theme="dark"] .card:hover{box-shadow:0 0 30px rgba(255,169,77,.1),var(--shadow-lg);}
+        code.inline-code{background:var(--surface-hover);padding:.2rem .4rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        /* ── Appointment modal ── */
+        .modal-overlay{overflow-y: auto !important; position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+        .modal-overlay.open{opacity:1;pointer-events:all;}
+        .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;max-width:480px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(20px);transition:transform .3s cubic-bezier(.16,1,.3,1);}
+        .modal-overlay.open .modal{transform:translateY(0); margin-top:130px !important;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;}
+        .modal-title{font-weight:700;font-size:1.1rem;}
+        .modal-close{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface-hover);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:var(--transition);}
+        .modal-close:hover{background:var(--primary-glow);color:var(--primary);}
+        .time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.75rem 0;}
+        .time-slot{padding:.5rem;text-align:center;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;font-size:.82rem;transition:var(--transition);background:var(--surface-hover);}
+        .time-slot:hover,.time-slot.selected{background:var(--primary-glow);border-color:var(--primary);color:var(--primary);font-weight:600;}
+        .appt-type-row{display:flex;gap:.5rem;margin:.5rem 0 .75rem;}
+        .appt-type{flex:1;padding:.6rem;text-align:center;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;font-size:.82rem;transition:var(--transition);background:var(--surface-hover);}
+        .appt-type:hover,.appt-type.selected{background:var(--primary-glow);border-color:var(--primary);color:var(--primary);font-weight:600;}
+
+        /* ── AI Consultant section ── */
+        .consultant-card{background:linear-gradient(135deg,var(--primary-glow),rgba(123,104,238,.1));border:1px solid rgba(255,169,77,.3);border-radius:var(--radius-sm);padding:1.25rem;margin-top:.75rem;}
+        .consultant-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+        .consultant-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);flex-shrink:0;}
+        .consultant-avatar img{width:100%;height:100%;object-fit:cover;}
+        .consultant-title{font-weight:700;font-size:1rem;}
+        .consultant-sub{font-size:.8rem;color:var(--text-secondary);margin-top:.15rem;}
+        .consultant-services{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.875rem;}
+        .consultant-service{display:flex;align-items:flex-start;gap:.5rem;font-size:.85rem;}
+        .consultant-service-icon{width:20px;height:20px;background:var(--primary-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary);}
+        .consultant-service-icon svg{width:12px;height:12px;}
+    </style>
+</head>
+<body data-theme="light">
+<div class="ambient-bg"></div>
+
+<header class="header">
+    <div class="brand">
+        <div class="brand-icon">
+            <img src="https://res.cloudinary.com/dgjuijjye/image/upload/v1778155371/imgme2_dkru8o.png" alt="Eze Goodness">
+        </div>
+        <div>
+            <div class="brand-text">Eze Goodness</div>
+            <div class="brand-sub">Full-Stack Dev · Prompt Engineer · AI Consultant</div>
+        </div>
+    </div>
+    <div class="header-actions">
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>Online</span>
+        </div>
+        <button class="btn-icon" id="themeToggle" title="Toggle theme">
+            <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<main class="chat-container">
+    <div class="messages" id="messages"></div>
+</main>
+
+<div class="input-area">
+    <div class="suggestions-row">
+        <button class="suggestion-chip" id="chip-about">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            About me
+        </button>
+        <button class="suggestion-chip" id="chip-projects">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Projects
+        </button>
+        <button class="suggestion-chip" id="chip-skills">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Skills
+        </button>
+        <button class="suggestion-chip" id="chip-consult">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            AI Consulting
+        </button>
+        <button class="suggestion-chip" id="chip-appt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Book Appointment
+        </button>
+        <button class="suggestion-chip" id="chip-testimonials">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Testimonials
+        </button>
+        <button class="suggestion-chip" id="chip-whyhire">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Why Hire Me
+        </button>
+        <button class="suggestion-chip" id="chip-pypi">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            PyPI Package
+        </button>
+        <button class="suggestion-chip" id="chip-contact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Contact
+        </button>
+    </div>
+    <div class="input-wrapper">
+        <button class="voice-btn" id="voiceBtn" title="Voice input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+        </button>
+        <textarea class="chat-input" id="chatInput" placeholder="Ask me anything..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" x2="11" y1="2" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<!-- Appointment Modal -->
+<div class="modal-overlay" id="apptModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" style="display:flex;align-items:center;gap:.5rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Book an Appointment</div>
+            <button class="modal-close" id="closeModal">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-input" id="apptName" placeholder="John Doe">
+        </div>
+        <div class="form-group" style="margin-top:.65rem;">
+            <label class="form-label">Your Email</label>
+            <input type="email" class="form-input" id="apptEmail" placeholder="john@example.com">
+        </div>
+        <div class="form-group" style="margin-top:.65rem;">
+            <label class="form-label">Appointment Type</label>
+            <div class="appt-type-row">
+                <div class="appt-type selected" data-type="Discovery Call">Discovery Call</div>
+                <div class="appt-type" data-type="AI Consulting">AI Consulting</div>
+                <div class="appt-type" data-type="Project Review">Project Review</div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:.65rem;">
+            <label class="form-label">Preferred Date</label>
+            <input type="date" class="form-input" id="apptDate">
+        </div>
+        <div class="form-group" style="margin-top:.65rem;">
+            <label class="form-label">Preferred Time</label>
+            <div class="time-slots" id="timeSlots">
+                <div class="time-slot" data-time="09:00 AM">09:00 AM</div>
+                <div class="time-slot" data-time="10:00 AM">10:00 AM</div>
+                <div class="time-slot" data-time="11:00 AM">11:00 AM</div>
+                <div class="time-slot" data-time="12:00 PM">12:00 PM</div>
+                <div class="time-slot" data-time="02:00 PM">02:00 PM</div>
+                <div class="time-slot" data-time="03:00 PM">03:00 PM</div>
+                <div class="time-slot" data-time="04:00 PM">04:00 PM</div>
+                <div class="time-slot" data-time="05:00 PM">05:00 PM</div>
+                <div class="time-slot" data-time="06:00 PM">06:00 PM</div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:.65rem;">
+            <label class="form-label">Brief Note (optional)</label>
+            <textarea class="form-input" id="apptNote" placeholder="What would you like to discuss?" style="min-height:60px;"></textarea>
+        </div>
+        <button class="btn-primary" id="submitAppt" style="width:100%;margin-top:.875rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Confirm Appointment
+        </button>
+        <div style="text-align:center;margin-top:.875rem;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;">
+                <div style="flex:1;height:1px;background:var(--border);"></div>
+                <span style="font-size:.78rem;color:var(--text-muted);white-space:nowrap;">or book instantly via</span>
+                <div style="flex:1;height:1px;background:var(--border);"></div>
+            </div>
+            <a id="waApptLink" href="#" target="_blank" rel="noopener"
+               style="display:inline-flex;align-items:center;justify-content:center;gap:.5rem;width:100%;
+                      padding:.625rem 1.25rem;background:#25D366;color:white;border:none;
+                      border-radius:var(--radius-xs);font-weight:600;font-size:.9rem;
+                      text-decoration:none;transition:var(--transition);"
+               onmouseover="this.style.background='#1ebe5d'" onmouseout="this.style.background='#25D366'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                Chat on WhatsApp
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── EmailJS init ─────────────────────────────────────────────────────────────
+var EJS_PUBLIC_KEY  = 'HKUmGBMthTGpWKxKO';
+var EJS_SERVICE_ID  = 'service_cd2f4cf';
+var EJS_CONTACT_TPL = 'template_2p7i5jq';
+var EJS_APPT_TPL    = 'template_tr7xx9k';
+var OWNER_EMAIL     = 'chimenmagoodness@gmail.com';
+var WA_NUMBER       = '238149824418'; // WhatsApp number
+
+(function(){ emailjs.init(EJS_PUBLIC_KEY); })();
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+var ICONS = {
+    home:     '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    ship:     '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.27.61 4.46 1.62 6"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><line x1="12" y1="5" x2="12" y2="9"/></svg>',
+    bank:     '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>',
+    chart:    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>',
+    bot:      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
+    key:      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+    star:     '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    zap:      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    building: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>',
+    python:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 .9 3 2v1H9V7c0-1.1 1.34-2 3-2zm0 14c-1.66 0-3-.9-3-2v-1h6v1c0 1.1-1.34 2-3 2z"/></svg>',
+    link:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    mail:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    github:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>',
+    linkedin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
+    twitter:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>',
+    send:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9"/></svg>',
+    user:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+    monitor:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+    activity: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    package:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
+    calendar: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    brain:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>',
+    check:    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    sun:      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+    moon:     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    whatsapp: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'
+};
+
+var PHOTO = 'https://res.cloudinary.com/dgjuijjye/image/upload/v1778155371/imgme2_dkru8o.png';
+
+// ─── Portfolio data ───────────────────────────────────────────────────────────
+var portfolioData = {
+    about: {
+        name: "Eze Goodness",
+        roles: ["Full-Stack Developer", "Prompt Engineer", "AI Consultant", "Data Annotator"],
+        bio: "I build scalable web applications, fintech platforms, and real-world digital solutions using Python (Flask & Django), JavaScript, PHP and more. With 6+ years of experience, I've delivered 100+ software projects across real estate, logistics, banking, and crypto — some confidential by agreement. I'm also a trained IT instructor who taught web development, digital marketing, computer fundamentals, and Microsoft Office tools to 200+ students at New Horizon Computer Learning Center. Beyond the web, I do Python-powered web scraping, data analysis, and cross-platform desktop apps with Kivy/KivyMD. As an AI consultant, I help businesses integrate AI tools, craft effective prompts, and annotate datasets for model training.",
+        location: "Nigeria",
+        interests: ["Fintech","Real Estate Tech","Logistics","Open Source","Flask/Django","Data Analysis","Desktop Apps","IT Training","Prompt Engineering","AI Consulting","Data Annotation"]
+    },
+    projects: [
+        { title:"B&G Homes",             desc:"Real estate platform with a reward system for realtors. Verified property listings with inspection scheduling and multiple payment options.",                                                    iconKey:"home",     tags:["Real Estate","Rewards","Payments"], link:"https://bghomesonline.com",                   category:"Real Estate" },
+        { title:"Uthao Global Logistics", desc:"Ocean freight shipping platform with real-time tracking, FCL/LCL container booking, reefer cargo handling, and break-bulk services across 150+ countries.",                                     iconKey:"ship",     tags:["Logistics","Tracking","Freight"],   link:"https://uthao-shipment.onrender.com",         category:"Logistics"   },
+        { title:"NewGenGlob Banking",     desc:"Full-featured banking system with account management, transactions, and secure financial operations.",                                                                                         iconKey:"bank",     tags:["Fintech","Banking","Security"],     link:"https://newgenglob.42web.io",                 category:"Fintech"     },
+        { title:"Trading Remedy",         desc:"Investment platform for trading and financial portfolio management with market analysis tools.",                                                                                               iconKey:"chart",    tags:["Investment","Trading","Finance"],   link:"https://tradingremedy.42web.io",              category:"Fintech"     },
+        { title:"Crypto Trading Bots",    desc:"Automated cryptocurrency trading platform with bot configurations and market monitoring.",                                                                                                    iconKey:"bot",      tags:["Crypto","Automation","Trading"],    link:"https://cyptotradingbots.onrender.com",       category:"Crypto"      },
+        { title:"HomeTrust Demo",         desc:"Property trust and real estate demo platform showcasing modern housing solutions.",                                                                                                           iconKey:"key",      tags:["Real Estate","Demo","UI/UX"],       link:"https://hometrustdemo.oneapp.dev",            category:"Real Estate" },
+        { title:"Switnex Portfolio",      desc:"Personal brand and portfolio showcase with modern design and interactive elements.",                                                                                                          iconKey:"star",     tags:["Portfolio","Branding","Design"],    link:"https://switnex1.oneapp.dev",                 category:"Portfolio"   },
+        { title:"Kral Energies",          desc:"Energy sector platform demo for sustainable power solutions and energy management.",                                                                                                          iconKey:"zap",      tags:["Energy","Sustainability","Demo"],   link:"https://kralenergies-by-switnex.oneapp.dev", category:"Energy"      },
+        { title:"Premium Realty Demo",    desc:"Premium real estate showcase with luxury property listings and high-end features.",                                                                                                          iconKey:"building", tags:["Luxury","Real Estate","Premium"],   link:"https://premiumrealtydemo.oneapp.dev",        category:"Real Estate" }
+    ],
+    pypi: {
+        name:"flask-smartflash",
+        desc:"A smart Flask extension for flash messages with categories, auto-dismiss, toast notifications, and customizable styling. Simplifies user feedback in Flask applications.",
+        url:"https://pypi.org/project/flask-smartflash/",
+        tags:["Flask","Python","Open Source","UI"]
+    },
+    skills: [
+        { name:"Python / Flask / Django",                level:95 },
+        { name:"JavaScript / React",                     level:90 },
+        { name:"PHP / Web Hosting",                      level:88 },
+        { name:"Database Design (MySQL, PostgreSQL)",    level:85 },
+        { name:"Fintech / Payment Integration",          level:82 },
+        { name:"Real Estate Tech",                       level:90 },
+        { name:"Prompt Engineering & AI Consulting",     level:88 },
+        { name:"Data Annotation",                        level:85 },
+        { name:"Web Scraping (Selenium, BeautifulSoup)", level:88 },
+        { name:"Data Analysis (Pandas, NumPy)",          level:82 },
+        { name:"Cross-Platform Apps (Kivy / KivyMD)",   level:78 },
+        { name:"Cloud / Render / 42web",                 level:80 },
+        { name:"UI/UX & Responsive Design",              level:85 },
+        { name:"Teaching & Technical Training",          level:92 }
+    ],
+    experience: [
+        { date:"2023 — Present", title:"Full-Stack Developer & AI Consultant", company:"Freelance / Self-Employed",            desc:"Building end-to-end web applications (Flask, Django, PHP, JS) for clients across real estate, fintech, logistics, and crypto. Delivered 100+ projects including NDA-protected enterprise solutions. Also providing AI consulting, prompt engineering, and data annotation services." },
+        { date:"2021 — 2023",    title:"IT Instructor",                        company:"New Horizon Computer Learning Center", desc:"Taught web development, digital marketing, computer fundamentals, and Microsoft Office tools (MS Word, Excel, PowerPoint, Outlook, and other Office apps) to 200+ students across multiple batches." },
+        { date:"2019 — 2021",    title:"Junior Developer & Learner",           company:"Self-Directed",                        desc:"Mastered Flask, Django, PHP, Python, and modern JavaScript. Built foundational skills in database architecture, responsive design, web scraping with Selenium/BeautifulSoup, data analysis with Pandas/NumPy, and cross-platform desktop apps with Kivy/KivyMD." }
+    ],
+    stats: { projects:"100+", clients:"90+", experience:"6+", students:"200+" },
+    contact: { email:"chimenmagoodness@gmail.com", github:"github.com/chimenmagoodness", linkedin:"linkedin.com/in/goodness-eze", twitter:"https://x.com/kingswitnexxtra", whatsapp:"https://wa.me/238149824418" }
+};
+
+// ─── State ────────────────────────────────────────────────────────────────────
+var isTyping = false, isRecording = false, currentTheme = 'light';
+var selectedTime = '', selectedApptType = 'Discovery Call';
+
+// ─── DOM refs ─────────────────────────────────────────────────────────────────
+var messagesEl  = document.getElementById('messages');
+var chatInput   = document.getElementById('chatInput');
+var sendBtn     = document.getElementById('sendBtn');
+var voiceBtn    = document.getElementById('voiceBtn');
+var toastEl     = document.getElementById('toast');
+var themeToggle = document.getElementById('themeToggle');
+var themeIcon   = document.getElementById('themeIcon');
+var apptModal   = document.getElementById('apptModal');
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function () {
+    var saved = localStorage.getItem('theme');
+    if (saved) { currentTheme = saved; document.body.setAttribute('data-theme', currentTheme); themeIcon.innerHTML = currentTheme==='dark'?ICONS.sun:ICONS.moon; }
+
+    // Set min date for appointment to today
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('apptDate').min = today;
+
+    document.getElementById('chip-about').addEventListener('click',        function(){ sendQuick('Tell me about yourself'); });
+    document.getElementById('chip-projects').addEventListener('click',     function(){ sendQuick('Show me your projects'); });
+    document.getElementById('chip-skills').addEventListener('click',       function(){ sendQuick('What are your skills?'); });
+    document.getElementById('chip-consult').addEventListener('click',      function(){ sendQuick('Tell me about your AI consulting services'); });
+    document.getElementById('chip-appt').addEventListener('click',         function(){ openApptModal(); });
+    document.getElementById('chip-testimonials').addEventListener('click', function(){ sendQuick('Do you have testimonials?'); });
+    document.getElementById('chip-whyhire').addEventListener('click',      function(){ sendQuick('Why should I hire you?'); });
+    document.getElementById('chip-pypi').addEventListener('click',         function(){ sendQuick('Tell me about flask-smartflash'); });
+    document.getElementById('chip-contact').addEventListener('click',      function(){ sendQuick('How to contact you?'); });
+    document.getElementById('closeModal').addEventListener('click',   function(){ closeApptModal(); });
+    apptModal.addEventListener('click', function(e){ if(e.target===apptModal) closeApptModal(); });
+
+    // Time slot selection
+    document.querySelectorAll('.time-slot').forEach(function(slot){
+        slot.addEventListener('click', function(){
+            document.querySelectorAll('.time-slot').forEach(function(s){ s.classList.remove('selected'); });
+            slot.classList.add('selected');
+            selectedTime = slot.dataset.time;
+        });
+    });
+
+    // Appointment type selection
+    document.querySelectorAll('.appt-type').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            document.querySelectorAll('.appt-type').forEach(function(b){ b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            selectedApptType = btn.dataset.type;
+        });
+    });
+
+    document.getElementById('submitAppt').addEventListener('click', submitAppointment);
+
+    // ── WhatsApp appointment link — updates live as user fills the form ──────
+    function updateWaApptLink(){
+        var name  = document.getElementById('apptName').value.trim();
+        var date  = document.getElementById('apptDate').value;
+        var note  = document.getElementById('apptNote').value.trim();
+        var msg   = 'Hi Goodness, I found your portfolio and would like to book a *'+selectedApptType+'*';
+        if(date)  msg += ' on *'+date+'*';
+        if(selectedTime) msg += ' at *'+selectedTime+'*';
+        if(name)  msg += '. My name is *'+name+'*';
+        if(note)  msg += '. Note: '+note;
+        msg += '. Please confirm.';
+        var link = document.getElementById('waApptLink');
+        if(link) link.href = 'https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg);
+    }
+    ['apptName','apptDate','apptNote'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.addEventListener('input', updateWaApptLink);
+    });
+    document.querySelectorAll('.time-slot').forEach(function(s){ s.addEventListener('click', updateWaApptLink); });
+    document.querySelectorAll('.appt-type').forEach(function(s){ s.addEventListener('click', updateWaApptLink); });
+    updateWaApptLink();
+    initGreeting();
+});
+
+// ─── Theme toggle ─────────────────────────────────────────────────────────────
+themeToggle.addEventListener('click', function () {
+    currentTheme = currentTheme==='light'?'dark':'light';
+    document.body.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+    themeIcon.innerHTML = currentTheme==='dark'?ICONS.sun:ICONS.moon;
+    showToastIcon(currentTheme==='light'?'check':'info', currentTheme==='light'?'Light mode activated':'Dark mode activated');
+});
+
+// ─── Input auto-grow ──────────────────────────────────────────────────────────
+chatInput.addEventListener('input', function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px'; });
+chatInput.addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); } });
+sendBtn.addEventListener('click', sendMessage);
+
+// ─── Voice button ─────────────────────────────────────────────────────────────
+voiceBtn.addEventListener('click', function(){
+    if(isRecording){ isRecording=false; voiceBtn.classList.remove('recording'); showToastIcon('info','Voice input stopped'); return; }
+    isRecording=true; voiceBtn.classList.add('recording'); showToastIcon('info','Listening...');
+    setTimeout(function(){
+        if(!isRecording) return;
+        isRecording=false; voiceBtn.classList.remove('recording');
+        var phrases=['Show me your projects','Tell me about flask-smartflash','What are your skills?','How to contact you?','Tell me about your AI consulting services'];
+        var pick=phrases[Math.floor(Math.random()*phrases.length)];
+        chatInput.value=pick; showToastIcon('check','Voice recognized: "'+pick+'"'); sendMessage();
+    },2000);
+});
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function openApptModal(){ apptModal.classList.add('open'); }
+function closeApptModal(){ apptModal.classList.remove('open'); }
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(text, duration){
+    toastEl.textContent=text; toastEl.classList.add('show');
+    setTimeout(function(){ toastEl.classList.remove('show'); }, duration||2800);
+}
+// Icon-prefixed toast — uses inline SVG, no emoji
+function showToastIcon(type, text, duration){
+    var iconMap = {
+        check:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>',
+        calendar: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFA94D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+        info:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7B68EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        warn:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    };
+    var icon = iconMap[type] || iconMap.info;
+    toastEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;">' + icon + '<span>' + text + '</span></span>';
+    toastEl.classList.add('show');
+    setTimeout(function(){ toastEl.classList.remove('show'); }, duration||2800);
+}
+
+// ─── Message helpers ──────────────────────────────────────────────────────────
+function addMessage(html, isUser){
+    var div=document.createElement('div');
+    div.className='message '+(isUser?'user':'ai');
+    var avInner=isUser?'You':'<img src="'+PHOTO+'" alt="Goodness">';
+    div.innerHTML='<div class="avatar '+(isUser?'user':'ai')+'">'+avInner+'</div><div class="message-content">'+html+'</div>';
+    messagesEl.appendChild(div); scrollToBottom(); return div;
+}
+function addThinking(){
+    var div=document.createElement('div'); div.className='message ai'; div.id='thinking-msg';
+    div.innerHTML='<div class="avatar ai"><img src="'+PHOTO+'" alt="Goodness"></div><div class="message-content"><div class="thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><span>Thinking...</span></div></div>';
+    messagesEl.appendChild(div); scrollToBottom();
+}
+function removeThinking(){ var el=document.getElementById('thinking-msg'); if(el)el.remove(); }
+function addTypingIndicator(){
+    var div=document.createElement('div'); div.className='message ai'; div.id='typing-indicator';
+    div.innerHTML='<div class="avatar ai"><img src="'+PHOTO+'" alt="Goodness"></div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+    messagesEl.appendChild(div); scrollToBottom();
+}
+function removeTypingIndicator(){ var el=document.getElementById('typing-indicator'); if(el)el.remove(); }
+function scrollToBottom(){ messagesEl.scrollTop=messagesEl.scrollHeight; }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+
+async function typewriterEffect(msgEl, text, speed){
+    speed=speed||20;
+    var content=msgEl.querySelector('.message-content');
+    content.innerHTML='<span id="tw-text"></span><span class="cursor-blink"></span>';
+    var span=document.getElementById('tw-text');
+    for(var i=0;i<text.length;i++){ span.textContent+=text[i]; if(i%3===0) scrollToBottom(); await sleep(speed); }
+    var cursor=content.querySelector('.cursor-blink'); if(cursor)cursor.remove();
+}
+function animateSkillBars(){
+    setTimeout(function(){ document.querySelectorAll('.skill-fill').forEach(function(bar){ bar.style.width=bar.dataset.width+'%'; }); },100);
+}
+function wireQuickBtns(container){
+    if(!container) return;
+    container.querySelectorAll('[data-quick]').forEach(function(btn){ btn.addEventListener('click',function(){ sendQuick(btn.dataset.quick); }); });
+    container.querySelectorAll('[data-open-appt]').forEach(function(btn){ btn.addEventListener('click',function(){ openApptModal(); }); });
+}
+
+// ─── Card builder ─────────────────────────────────────────────────────────────
+function makeCard(p){
+    return '<a href="'+p.link+'" target="_blank" rel="noopener" class="card">'+
+        '<div class="project-category">'+p.category+'</div>'+
+        '<div class="card-icon">'+ICONS[p.iconKey]+'</div>'+
+        '<div class="card-title">'+p.title+'</div>'+
+        '<div class="card-desc">'+p.desc+'</div>'+
+        '<div class="card-tags">'+p.tags.map(function(t){return'<span class="tag">'+t+'</span>';}).join('')+'</div>'+
+        '<div class="card-link">'+ICONS.link+' Visit Site</div>'+
+        '</a>';
+}
+
+// ─── Response generators ───────────────────────────────────────────────────────
+function generateAboutResponse(){
+    var badges=portfolioData.about.roles.map(function(r){return'<span class="role-badge">'+r+'</span>';}).join('');
+    return '<div class="welcome-hero">'+
+        '<div class="profile-photo"><img src="'+PHOTO+'" alt="Eze Goodness"></div>'+
+        '<h1>Hey, I\'m '+portfolioData.about.name+'</h1>'+
+        '<div class="role-badges">'+badges+'</div>'+
+        '<p style="display:inline-flex;align-items:center;gap:.35rem;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Nigeria &nbsp;&middot;&nbsp; Open to remote worldwide</p>'+
+        '</div>'+
+        '<p style="margin-top:.75rem;">'+portfolioData.about.bio+'</p>'+
+        '<div class="quick-actions">'+portfolioData.about.interests.map(function(i){return'<span class="quick-btn">'+i+'</span>';}).join('')+'</div>'+
+        '<div class="stats-grid" style="margin-top:1rem;grid-template-columns:repeat(4,1fr);">'+
+        '<div class="stat-box"><div class="stat-number">'+portfolioData.stats.projects+'</div><div class="stat-label">Projects</div></div>'+
+        '<div class="stat-box"><div class="stat-number">'+portfolioData.stats.clients+'</div><div class="stat-label">Clients</div></div>'+
+        '<div class="stat-box"><div class="stat-number">'+portfolioData.stats.experience+'</div><div class="stat-label">Years Exp.</div></div>'+
+        '<div class="stat-box"><div class="stat-number">'+portfolioData.stats.students+'</div><div class="stat-label">Students Taught</div></div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:1rem;">'+
+        '<a href="https://linkedin.com/in/goodness-eze" target="_blank" rel="noopener" class="quick-btn">'+ICONS.linkedin+' Verify on LinkedIn</a>'+
+        '<a href="https://github.com/chimenmagoodness" target="_blank" rel="noopener" class="quick-btn">'+ICONS.github+' GitHub Profile</a>'+
+        '<button class="quick-btn" data-quick="Do you have testimonials?">'+ICONS.star+' Client Testimonials</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Call</button>'+
+        '</div>';
+}
+
+function generateProjectsResponse(){
+    return '<p>Here are the real projects I\'ve shipped to production. Click any card to visit the live site:</p>'+
+        '<div class="card-grid">'+portfolioData.projects.map(makeCard).join('')+'</div>'+
+        '<p style="margin-top:1rem;font-size:.9rem;color:var(--text-secondary);"><em>Note: Many more projects exist under NDA / confidentiality agreements and cannot be publicly shared.</em></p>';
+}
+
+function generatePypiResponse(){
+    var p=portfolioData.pypi;
+    return '<p>I also contribute to the open-source community! Here\'s my Python package on PyPI:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:500px;">'+
+        '<div class="project-category">Open Source</div>'+
+        '<div class="card-icon">'+ICONS.python+'</div>'+
+        '<div class="card-title">'+p.name+'</div>'+
+        '<div class="card-desc">'+p.desc+'</div>'+
+        '<div class="card-tags">'+p.tags.map(function(t){return'<span class="tag">'+t+'</span>';}).join('')+'</div>'+
+        '<a href="'+p.url+'" target="_blank" rel="noopener" class="pypi-badge">'+
+        '<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>'+
+        'View on PyPI</a></div>'+
+        '<p style="margin-top:1rem;font-size:.9rem;color:var(--text-secondary);">Install with: <code class="inline-code">pip install flask-smartflash</code></p>';
+}
+
+function generateSkillsResponse(){
+    var skills=portfolioData.skills.map(function(s){
+        return '<div class="skill-item">'+
+            '<div class="skill-header"><span class="skill-name">'+s.name+'</span><span class="skill-level">'+s.level+'%</span></div>'+
+            '<div class="skill-bar"><div class="skill-fill" data-width="'+s.level+'"></div></div>'+
+            '</div>';
+    }).join('');
+    return '<p>My technical toolkit spans full-stack development, AI consulting, prompt engineering, and data annotation:</p>'+
+        '<div style="margin-top:1rem;">'+skills+'</div>'+
+        '<div class="quick-actions" style="margin-top:1rem;">'+
+        '<button class="quick-btn" data-quick="Tell me about your fintech projects">'+ICONS.bank+' Fintech</button>'+
+        '<button class="quick-btn" data-quick="Real estate projects you built">'+ICONS.home+' Real Estate</button>'+
+        '<button class="quick-btn" data-quick="Tell me about flask-smartflash">'+ICONS.package+' Open Source</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '</div>';
+}
+
+function generateExperienceResponse(){
+    var items=portfolioData.experience.map(function(e){
+        return '<div class="timeline-item">'+
+            '<div class="timeline-date">'+e.date+'</div>'+
+            '<div class="timeline-title">'+e.title+' @ '+e.company+'</div>'+
+            '<div class="timeline-desc">'+e.desc+'</div>'+
+            '</div>';
+    }).join('');
+    return '<p>My journey across 6+ years of building production software and teaching technology:</p>'+
+        '<div class="timeline">'+items+'</div>'+
+        '<p style="margin-top:1rem;font-size:.9rem;color:var(--text-secondary);"><em>Every project taught me something new about shipping reliable software that real people use.</em></p>';
+}
+
+function generateContactResponse(){
+    var c=portfolioData.contact;
+    return '<p>Let\'s build something great together! Drop me a message and I\'ll get back to you ASAP:</p>'+
+        '<div class="contact-form">'+
+        '<div class="form-group"><label class="form-label">Your Name</label><input type="text" class="form-input" placeholder="John Doe" id="contactName"></div>'+
+        '<div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" placeholder="john@example.com" id="contactEmail"></div>'+
+        '<div class="form-group"><label class="form-label">Subject</label><input type="text" class="form-input" placeholder="Project inquiry, collaboration..." id="contactSubject"></div>'+
+        '<div class="form-group"><label class="form-label">Message</label><textarea class="form-input" placeholder="Tell me about your project or just say hi!" id="contactMessage"></textarea></div>'+
+        '<button class="btn-primary" id="submitContactBtn">'+ICONS.send+' Send Message</button>'+
+        '</div>'+
+        '<div class="social-links" style="margin-top:1rem;">'+
+        '<a href="mailto:'+c.email+'" class="social-link">'+ICONS.mail+' Email</a>'+
+        '<a href="https://wa.me/'+WA_NUMBER+'?text=Hi%20Goodness%2C%20I%20found%20your%20portfolio%20and%20would%20like%20to%20connect." target="_blank" rel="noopener" class="social-link whatsapp">'+ICONS.whatsapp+' WhatsApp</a>'+
+        '<a href="https://'+c.github+'" target="_blank" rel="noopener" class="social-link">'+ICONS.github+' GitHub</a>'+
+        '<a href="https://'+c.linkedin+'" target="_blank" rel="noopener" class="social-link">'+ICONS.linkedin+' LinkedIn</a>'+
+        '<a href="'+c.twitter+'" target="_blank" rel="noopener" class="social-link">'+ICONS.twitter+' X / Twitter</a>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:1rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book Appointment Instead</button>'+
+        '</div>';
+}
+
+function generateConsultingResponse(){
+    return '<div class="consultant-card">'+
+        '<div class="consultant-header">'+
+        '<div class="consultant-avatar"><img src="'+PHOTO+'" alt="Eze Goodness"></div>'+
+        '<div><div class="consultant-title">Eze Goodness — AI Consultant</div>'+
+        '<div class="consultant-sub">Prompt Engineering · AI Integration · Data Annotation</div></div>'+
+        '</div>'+
+        '<p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:.875rem;">I help individuals and businesses leverage AI tools effectively — from crafting high-performance prompts to integrating LLMs into existing workflows and building AI-ready datasets.</p>'+
+        '<div class="consultant-services">'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>Prompt Engineering</strong> — Design optimized prompts for GPT, Claude, Gemini & other LLMs for business use-cases.</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>AI Integration</strong> — Embed AI features into your web apps (chatbots, auto-responses, content generation, data extraction).</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>Data Annotation</strong> — High-quality labelling, classification, RLHF feedback, and dataset preparation for ML model training.</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>AI Strategy</strong> — Identify where AI can save your team time and money; build a roadmap for adoption.</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>Workflow Automation</strong> — Automate repetitive tasks using Python + AI APIs to streamline operations.</div></div>'+
+        '</div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:1rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Consultation</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Get in Touch</button>'+
+        '</div>';
+}
+
+function generateAppointmentResponse(){
+    return '<p>I\'d love to connect! You can book a call or meeting directly:</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Open Booking Form</button>'+
+        '</div>'+
+        '<p style="margin-top:.75rem;font-size:.88rem;color:var(--text-secondary);">Available for: Discovery Calls, AI Consulting sessions, Project Reviews, and Technical Discussions. Slots are available Mon–Sat, 9 AM – 6 PM (WAT).</p>';
+}
+
+function generateHelpResponse(){
+    return '<p>Here are some things you can ask me:</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="Tell me about yourself">'+ICONS.user+' About me</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' Projects</button>'+
+        '<button class="quick-btn" data-quick="What are your skills?">'+ICONS.activity+' Skills</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '<button class="quick-btn" data-quick="Tell me about flask-smartflash">'+ICONS.package+' PyPI Package</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Contact</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book Appointment</button>'+
+        '</div>';
+}
+
+function generateRealEstateResponse(){
+    var re=portfolioData.projects.filter(function(p){return p.category==='Real Estate';});
+    return '<p><strong>Real Estate Tech</strong> is one of my core specialties. I\'ve built:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+re.map(makeCard).join('')+'</div>';
+}
+function generateLogisticsResponse(){
+    var p=portfolioData.projects.find(function(x){return x.category==='Logistics';});
+    return '<p><strong>Global Logistics</strong> — I built Uthao, a complete ocean freight platform:</p>'+makeCard(p);
+}
+function generateFintechResponse(){
+    var fin=portfolioData.projects.filter(function(p){return p.category==='Fintech'||p.category==='Crypto';});
+    return '<p><strong>Fintech &amp; Trading</strong> platforms I\'ve built:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+fin.map(makeCard).join('')+'</div>';
+}
+function generateGreetingResponse(){
+    var hour=new Date().getHours(), time=hour<12?'morning':hour<18?'afternoon':'evening';
+    return 'Good '+time+'! Great to meet you. I\'m Goodness — a Full-Stack Developer, Prompt Engineer & AI Consultant with 6+ years of experience. I\'ve delivered 100+ projects and trained 200+ students. What can I help you explore?'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="Tell me about yourself">'+ICONS.user+' About me</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' Projects</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book Appointment</button>'+
+        '</div>';
+}
+function generateAvailabilityResponse(){
+    return '<p><strong>Yes, I\'m currently open for new opportunities!</strong> Whether you need a full-stack web app (Flask/Django/PHP), AI consulting, prompt engineering, data annotation, Python automation, or a desktop application — I\'m available for freelance projects, collaborations, and contract roles.</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Get in touch</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Call</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' See my work</button>'+
+        '</div>';
+}
+function generateTeachingResponse(){
+    return '<p>Beyond development and AI consulting, I\'m also an experienced <strong>IT Instructor</strong>:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Education</div>'+
+        '<div class="card-icon">'+ICONS.zap+'</div>'+
+        '<div class="card-title">New Horizon Computer Learning Center</div>'+
+        '<div class="card-desc">Taught web development, digital marketing, computer fundamentals, and Microsoft Office tools (Word, Excel, PowerPoint, Outlook, and other Office apps) to <strong>200+ students</strong> across multiple batches over 2 years.</div>'+
+        '<div class="card-tags"><span class="tag">Web Dev</span><span class="tag">Digital Marketing</span><span class="tag">MS Office</span><span class="tag">IT Fundamentals</span></div>'+
+        '</div>'+
+        '<p style="margin-top:.75rem;font-size:.9rem;color:var(--text-secondary);"><em>Great developers make great teachers — explaining complex ideas clearly is a superpower.</em></p>';
+}
+function generateScrapingDataResponse(){
+    return '<p>Python is one of my strongest tools for <strong>automation, scraping, data analysis, and cross-platform apps</strong>:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+
+        '<div class="card"><div class="project-category">Automation</div><div class="card-icon">'+ICONS.bot+'</div><div class="card-title">Web Scraping</div><div class="card-desc">Automated data extraction using Selenium, BeautifulSoup, and Requests — handles dynamic pages, pagination, and structured data export.</div><div class="card-tags"><span class="tag">Selenium</span><span class="tag">BeautifulSoup</span><span class="tag">Requests</span></div></div>'+
+        '<div class="card"><div class="project-category">Data Analysis</div><div class="card-icon">'+ICONS.chart+'</div><div class="card-title">Data Analysis & Processing</div><div class="card-desc">Cleaning, transforming, and analysing datasets with Pandas, NumPy, and Matplotlib to generate actionable insights.</div><div class="card-tags"><span class="tag">Pandas</span><span class="tag">NumPy</span><span class="tag">Matplotlib</span></div></div>'+
+        '<div class="card"><div class="project-category">Desktop Apps</div><div class="card-icon">'+ICONS.monitor+'</div><div class="card-title">Cross-Platform Desktop Apps</div><div class="card-desc">Built GUI applications using Kivy and KivyMD — runs on Windows, Linux, macOS, and Android from a single Python codebase.</div><div class="card-tags"><span class="tag">Kivy</span><span class="tag">KivyMD</span><span class="tag">Python</span></div></div>'+
+        '</div>';
+}
+function generateAnnotationResponse(){
+    return '<p>As a <strong>Data Annotator</strong>, I help teams build better AI models by producing high-quality training data:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">AI / ML</div>'+
+        '<div class="card-icon">'+ICONS.brain+'</div>'+
+        '<div class="card-title">Data Annotation Services</div>'+
+        '<div class="card-desc">I provide precise labelling, classification, sentiment tagging, RLHF feedback, and dataset curation for NLP, computer vision, and general ML projects. Accuracy and consistency are my top priorities.</div>'+
+        '<div class="card-tags"><span class="tag">NLP</span><span class="tag">RLHF</span><span class="tag">Classification</span><span class="tag">Dataset Curation</span></div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:.875rem;">'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Discussion</button>'+
+        '</div>';
+}
+
+function generateConsultingResponse(){
+    return '<div class="consultant-card">'+
+        '<div class="consultant-header">'+
+        '<div class="consultant-avatar"><img src="'+PHOTO+'" alt="Eze Goodness"></div>'+
+        '<div><div class="consultant-title">Eze Goodness — AI Consultant</div>'+
+        '<div class="consultant-sub">Prompt Engineering · AI Integration · Data Annotation</div></div>'+
+        '</div>'+
+        '<p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:.875rem;">I help individuals and businesses leverage AI tools effectively — from crafting high-performance prompts to integrating LLMs into existing workflows and building AI-ready datasets.</p>'+
+        '<div class="consultant-services">'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>Prompt Engineering</strong> — Design optimized prompts for GPT-4, Claude, Gemini &amp; other LLMs for business use-cases.</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>AI Integration</strong> — Embed AI features into your web apps (chatbots, auto-responses, content generation, data extraction).</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>Data Annotation</strong> — High-quality labelling, classification, RLHF feedback, and dataset preparation for ML model training.</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>AI Strategy</strong> — Identify where AI can save your team time and money; build a clear roadmap for adoption.</div></div>'+
+        '<div class="consultant-service"><div class="consultant-service-icon">'+ICONS.check+'</div><div><strong>Workflow Automation</strong> — Automate repetitive tasks using Python + AI APIs to streamline operations.</div></div>'+
+        '</div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:1rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Consultation</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Get in Touch</button>'+
+        '</div>';
+}
+
+function generateTestimonialsResponse(){
+    var reviews = [
+        { name:'Adaeze O.', role:'Real Estate Business Owner', stars:5, text:'Goodness built our B&G Homes platform from scratch. The realtor reward system he designed was exactly what we envisioned — and he delivered ahead of schedule. Highly professional.' },
+        { name:'Femi A.', role:'Logistics Startup Founder', stars:5, text:'Uthao Global would not exist without Goodness. He handled the entire ocean freight booking system, real-time tracking, and the reefer cargo module. Brilliant developer.' },
+        { name:'Chidi N.', role:'Fintech Entrepreneur', stars:5, text:'Our banking platform needed tight security and clean UX. Goodness delivered both. He also helped us integrate Paystack flawlessly. We have worked together on 3 projects now.' },
+        { name:'Blessing I.', role:'Student, New Horizon', stars:5, text:'Mr. Goodness was the best IT instructor I have had. He explained web development and MS Office in a way that was clear and practical. I got my first dev job because of his training.' },
+        { name:'Kelechi M.', role:'Crypto Platform Owner', stars:5, text:'The crypto trading bot platform he built for us is stable, fast, and handles live market data without issues. He also set up our automated monitoring — 10/10 work.' },
+        { name:'Ngozi E.', role:'AI Startup Founder', stars:5, text:'His prompt engineering expertise is top-tier. He redesigned our LLM prompts and our model accuracy improved dramatically. Also helped us build our annotation pipeline.' }
+    ];
+    var starsHTML = function(n) {
+        var s = '';
+        for (var i = 0; i < n; i++) s += '<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFA94D" stroke="#FFA94D" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        return s;
+    };
+    var cards = reviews.map(function(r){
+        return '<div class="card" style="max-width:100%;">'+
+            '<div style="display:flex;gap:.3rem;margin-bottom:.5rem;">'+starsHTML(r.stars)+'</div>'+
+            '<div class="card-desc" style="font-style:italic;margin-bottom:.75rem;">"'+r.text+'"</div>'+
+            '<div style="font-size:.8rem;font-weight:600;color:var(--text);">'+r.name+'</div>'+
+            '<div style="font-size:.75rem;color:var(--text-muted);">'+r.role+'</div>'+
+            '</div>';
+    }).join('');
+    return '<p>Here is what clients and students say about working with me:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+cards+'</div>'+
+        '<p style="margin-top:1rem;font-size:.88rem;color:var(--text-secondary);"><em>References available on request. More testimonials exist under NDA agreements.</em></p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Work With Me</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' See My Projects</button>'+
+        '</div>';
+}
+
+function generateScrapingDataResponse(){
+    return '<p>Python is one of my strongest tools for <strong>automation, scraping, data analysis, and cross-platform apps</strong>:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+
+        '<div class="card"><div class="project-category">Automation</div><div class="card-icon">'+ICONS.bot+'</div><div class="card-title">Web Scraping</div><div class="card-desc">Automated data extraction using Selenium, BeautifulSoup, and Requests — handles dynamic pages, pagination, and structured data export.</div><div class="card-tags"><span class="tag">Selenium</span><span class="tag">BeautifulSoup</span><span class="tag">Requests</span></div></div>'+
+        '<div class="card"><div class="project-category">Data Analysis</div><div class="card-icon">'+ICONS.chart+'</div><div class="card-title">Data Analysis &amp; Processing</div><div class="card-desc">Cleaning, transforming, and analysing datasets with Pandas, NumPy, and Matplotlib to generate actionable insights.</div><div class="card-tags"><span class="tag">Pandas</span><span class="tag">NumPy</span><span class="tag">Matplotlib</span></div></div>'+
+        '<div class="card"><div class="project-category">Desktop Apps</div><div class="card-icon">'+ICONS.monitor+'</div><div class="card-title">Cross-Platform Desktop Apps</div><div class="card-desc">Built GUI applications using Kivy and KivyMD — runs on Windows, Linux, macOS, and Android from a single Python codebase.</div><div class="card-tags"><span class="tag">Kivy</span><span class="tag">KivyMD</span><span class="tag">Python</span></div></div>'+
+        '</div>';
+}
+
+function generateTeachingResponse(){
+    return '<p>Beyond development and AI consulting, I am also an experienced <strong>IT Instructor</strong>:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Education</div>'+
+        '<div class="card-icon">'+ICONS.zap+'</div>'+
+        '<div class="card-title">New Horizon Computer Learning Center</div>'+
+        '<div class="card-desc">Taught web development, digital marketing, computer fundamentals, and Microsoft Office tools (Word, Excel, PowerPoint, Outlook, and other Office apps) to <strong>200+ students</strong> across multiple batches over 2 years.</div>'+
+        '<div class="card-tags"><span class="tag">Web Dev</span><span class="tag">Digital Marketing</span><span class="tag">MS Office</span><span class="tag">IT Fundamentals</span></div>'+
+        '</div>'+
+        '<p style="margin-top:.75rem;font-size:.9rem;color:var(--text-secondary);"><em>Great developers make great teachers — explaining complex ideas clearly is a superpower.</em></p>';
+}
+
+function generateAvailabilityResponse(){
+    return '<p><strong>Yes, I am currently open for new opportunities!</strong> Whether you need a full-stack web app (Flask/Django/PHP), AI consulting, prompt engineering, data annotation, Python automation, or a desktop application — I am available for freelance projects, collaborations, and contract roles.</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Get in touch</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Call</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' See my work</button>'+
+        '</div>';
+}
+
+function generateGreetingResponse(){
+    var hour=new Date().getHours(), time=hour<12?'morning':hour<18?'afternoon':'evening';
+    return 'Good '+time+'! Great to meet you. I\'m Goodness — a Full-Stack Developer, Prompt Engineer &amp; AI Consultant with 6+ years of experience. I\'ve delivered 100+ projects and trained 200+ students. What can I help you explore?'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="Tell me about yourself">'+ICONS.user+' About me</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' Projects</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book Appointment</button>'+
+        '</div>';
+}
+
+function generateAppointmentResponse(){
+    return '<p>I\'d love to connect! Book a call or message me directly on WhatsApp:</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Open Booking Form</button>'+
+        '<a href="https://wa.me/'+WA_NUMBER+'?text=Hi%20Goodness%2C%20I%20would%20like%20to%20schedule%20a%20call%20with%20you." target="_blank" rel="noopener" class="quick-btn" style="text-decoration:none;color:inherit;">'+ICONS.whatsapp+' WhatsApp Me</a>'+
+        '</div>'+
+        '<p style="margin-top:.75rem;font-size:.88rem;color:var(--text-secondary);">Available for: Discovery Calls, AI Consulting sessions, Project Reviews, and Technical Discussions. Slots available Mon–Sat, 9 AM – 6 PM (WAT).</p>';
+}
+
+function generateUnknownResponse(){
+    return '<p>I\'m not sure I understood that perfectly. I\'m best at talking about my work, skills, and experience. Try asking:</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' Projects</button>'+
+        '<button class="quick-btn" data-quick="What are your skills?">'+ICONS.activity+' Skills</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '<button class="quick-btn" data-quick="Tell me about flask-smartflash">'+ICONS.package+' PyPI Package</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Contact</button>'+
+        '</div>';
+}
+
+// ─── Additional response generators ──────────────────────────────────────────
+function generateTestimonialsResponse(){
+    var reviews=[
+        {name:'Adaeze O.',role:'Real Estate Business Owner',stars:5,text:'Goodness built our B&G Homes platform from scratch. The realtor reward system he designed was exactly what we envisioned — delivered ahead of schedule. Highly professional.'},
+        {name:'Femi A.',role:'Logistics Startup Founder',stars:5,text:'Uthao Global would not exist without Goodness. He handled the entire ocean freight booking system, real-time tracking, and reefer cargo module. Brilliant developer.'},
+        {name:'Chidi N.',role:'Fintech Entrepreneur',stars:5,text:'Our banking platform needed tight security and clean UX. Goodness delivered both and integrated Paystack flawlessly. We\'ve worked together on 3 projects now.'},
+        {name:'Blessing I.',role:'Student, New Horizon',stars:5,text:'Mr. Goodness was the best IT instructor I\'ve had. He explained web development and MS Office in a way that was clear and practical. I got my first dev job because of his training.'},
+        {name:'Kelechi M.',role:'Crypto Platform Owner',stars:5,text:'The crypto trading bot platform he built is stable, fast, and handles live market data without issues. He also set up our automated monitoring — 10/10 work.'},
+        {name:'Ngozi E.',role:'AI Startup Founder',stars:5,text:'His prompt engineering expertise is top-tier. He redesigned our LLM prompts and model accuracy improved dramatically. Also helped us build our annotation pipeline.'}
+    ];
+    var starsHTML=function(n){var s='';for(var i=0;i<n;i++)s+='<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFA94D" stroke="#FFA94D" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';return s;};
+    var cards=reviews.map(function(r){
+        return '<div class="card" style="max-width:100%;">'+
+            '<div style="display:flex;gap:.35rem;margin-bottom:.5rem;">'+starsHTML(r.stars)+'</div>'+
+            '<div class="card-desc" style="font-style:italic;margin-bottom:.75rem;line-height:1.6;">"'+r.text+'"</div>'+
+            '<div style="font-size:.85rem;font-weight:600;color:var(--text);">'+r.name+'</div>'+
+            '<div style="font-size:.75rem;color:var(--text-muted);">'+r.role+'</div>'+
+            '</div>';
+    }).join('');
+    return '<p>Here\'s what clients and students say about working with me:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+cards+'</div>'+
+        '<p style="margin-top:1rem;font-size:.85rem;color:var(--text-secondary);">'+
+        '<em>References available on request. More testimonials exist under NDA agreements.</em></p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Work With Me</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' See My Projects</button>'+
+        '</div>';
+}
+
+function generatePricingResponse(){
+    return '<p>My rates are flexible and depend on scope, complexity, and timeline. Here\'s a general guide:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Pricing Guide</div>'+
+        '<div class="card-icon">'+ICONS.chart+'</div>'+
+        '<div class="card-title">Flexible Engagement Models</div>'+
+        '<div class="card-desc">'+
+        '<strong>Hourly:</strong> Best for small tasks, bug fixes, and consulting sessions<br><br>'+
+        '<strong>Fixed Price:</strong> Ideal for well-defined projects with clear scope<br><br>'+
+        '<strong>Retainer:</strong> Ongoing support, maintenance, or AI consulting partnerships<br><br>'+
+        '<strong>Milestone-based:</strong> Pay per completed phase — reduces risk for both sides'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">Negotiable</span><span class="tag">NDA Available</span><span class="tag">Milestone-Based</span><span class="tag">No Hidden Fees</span></div>'+
+        '</div>'+
+        '<p style="margin-top:.875rem;font-size:.9rem;color:var(--text-secondary);">I\'ll give you a tailored quote with zero obligation — just describe your project.</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Get a Free Quote</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Email Me</button>'+
+        '</div>';
+}
+
+function generateTimelineResponse(){
+    return '<p>Typical delivery windows by project type:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Turnaround Times</div>'+
+        '<div class="card-icon">'+ICONS.calendar+'</div>'+
+        '<div class="card-title">Estimated Delivery Windows</div>'+
+        '<div class="card-desc">'+
+        '<strong>Landing page / Portfolio:</strong> 3–7 days<br><br>'+
+        '<strong>Full web app (Flask/Django):</strong> 2–6 weeks<br><br>'+
+        '<strong>Fintech / Banking platform:</strong> 4–10 weeks<br><br>'+
+        '<strong>AI integration / Prompt setup:</strong> 1–2 weeks<br><br>'+
+        '<strong>Data annotation project:</strong> Dependent on dataset size<br><br>'+
+        '<strong>Desktop app (Kivy):</strong> 2–5 weeks'+
+        '</div>'+
+        '</div>'+
+        '<p style="margin-top:.875rem;font-size:.9rem;color:var(--text-secondary);">Rush delivery is possible — mention your deadline when you reach out.</p>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Discuss Your Project</button>'+
+        '</div>';
+}
+
+function generateWhyHireResponse(){
+    return '<p>Here\'s what makes working with me different:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="card-icon">'+ICONS.star+'</div>'+
+        '<div class="card-title">Why Work With Me</div>'+
+        '<div class="card-desc">'+
+        '<strong>Full-stack versatility</strong> — Frontend, backend, database, and deployment in one person<br><br>'+
+        '<strong>Production track record</strong> — 100+ shipped projects across multiple industries<br><br>'+
+        '<strong>AI-native</strong> — Traditional dev skills combined with modern AI integration and prompt engineering<br><br>'+
+        '<strong>Clear communicator</strong> — 2 years teaching 200+ students built exceptional communication skills<br><br>'+
+        '<strong>Reliable and discreet</strong> — NDA-compliant, deadline-driven, and client-focused throughout'+
+        '</div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:.875rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Let\'s Talk</button>'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' See My Work</button>'+
+        '<button class="quick-btn" data-quick="Do you have testimonials?">'+ICONS.star+' Testimonials</button>'+
+        '</div>';
+}
+
+function generateProcessResponse(){
+    return '<p>Here\'s how we typically kick off a project together:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="card-icon">'+ICONS.calendar+'</div>'+
+        '<div class="card-title">My Working Process</div>'+
+        '<div class="card-desc">'+
+        '<strong>1. Discovery call</strong> — Understand your goals, scope, and timeline (free, 30 mins)<br><br>'+
+        '<strong>2. Proposal</strong> — Detailed scope, pricing, milestones, and delivery plan<br><br>'+
+        '<strong>3. Design &amp; Plan</strong> — Architecture review, wireframes or mockups if needed<br><br>'+
+        '<strong>4. Build</strong> — Regular updates, milestone demos, version-controlled code<br><br>'+
+        '<strong>5. Test &amp; Deploy</strong> — QA testing, bug fixes, live production deployment<br><br>'+
+        '<strong>6. Handover &amp; Support</strong> — Full code handover, documentation, post-launch support'+
+        '</div>'+
+        '</div>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Start with a Discovery Call</button>'+
+        '</div>';
+}
+
+function generateNDAResponse(){
+    return 'Yes, I work under <strong>NDA (Non-Disclosure Agreements)</strong> for all sensitive projects. A significant portion of my 100+ delivered projects are under confidentiality — primarily enterprise software, banking systems, and proprietary platforms. Professionalism and discretion are always guaranteed.'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Discuss a Confidential Project</button>'+
+        '</div>';
+}
+
+function generateLocationResponse(){
+    return 'I\'m based in <strong>Nigeria (WAT — UTC+1)</strong> and work with clients globally. I\'m fully remote-ready and have delivered projects for clients across Africa, Europe, and beyond. Time zones have never been a barrier — I adapt my schedule to suit client needs.'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Call</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Contact Me</button>'+
+        '</div>';
+}
+
+function generateMaintenanceResponse(){
+    return 'Yes — I offer ongoing <strong>maintenance and support</strong> after project launch. This includes bug fixes, feature additions, security patches, hosting management, and performance optimisation. I\'m also happy to take over and maintain projects built by other developers.'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Discuss a Support Plan</button>'+
+        '<button class="quick-btn" data-quick="What are your rates?">'+ICONS.chart+' Pricing</button>'+
+        '</div>';
+}
+
+function generateDjangoResponse(){
+    return '<p>I work with both <strong>Flask</strong> and <strong>Django</strong> — the choice depends on your project needs:</p>'+
+        '<div class="card-grid" style="margin-top:.75rem;">'+
+        '<div class="card"><div class="project-category">Microframework</div><div class="card-icon">'+ICONS.zap+'</div><div class="card-title">Flask</div><div class="card-desc">Lightweight and flexible — perfect for APIs, custom architectures, and fine-grained control. My primary framework used across most shipped products.</div><div class="card-tags"><span class="tag">APIs</span><span class="tag">Flexible</span><span class="tag">Lightweight</span></div></div>'+
+        '<div class="card"><div class="project-category">Full Framework</div><div class="card-icon">'+ICONS.building+'</div><div class="card-title">Django</div><div class="card-desc">Batteries-included — ideal for large-scale apps, CMSs, and projects needing built-in admin, ORM, and authentication out of the box.</div><div class="card-tags"><span class="tag">Full-Stack</span><span class="tag">Admin Panel</span><span class="tag">Scalable</span></div></div>'+
+        '</div>';
+}
+
+function generateGithubResponse(){
+    return 'My GitHub is <strong>github.com/chimenmagoodness</strong> — you\'ll find open-source work including my PyPI package <code class="inline-code">flask-smartflash</code>, demo repos, and public experiments. Many client projects live in private repos due to NDA agreements.'+
+        '<div class="social-links" style="margin-top:.75rem;">'+
+        '<a href="https://github.com/chimenmagoodness" target="_blank" rel="noopener" class="social-link">'+ICONS.github+' View GitHub Profile</a>'+
+        '<a href="https://pypi.org/project/flask-smartflash/" target="_blank" rel="noopener" class="social-link">'+ICONS.package+' flask-smartflash on PyPI</a>'+
+        '</div>';
+}
+
+function generateLinkedInResponse(){
+    return 'Connect with me professionally on LinkedIn — my full work history, endorsements, and recommendations are there:'+
+        '<div class="social-links" style="margin-top:.75rem;">'+
+        '<a href="https://linkedin.com/in/goodness-eze" target="_blank" rel="noopener" class="social-link">'+ICONS.linkedin+' linkedin.com/in/goodness-eze</a>'+
+        '</div>'+
+        '<p style="margin-top:.75rem;font-size:.9rem;color:var(--text-secondary);">Feel free to connect with a note about your project or collaboration idea.</p>';
+}
+
+function generatePromptEngineeringResponse(){
+    return '<p>As a <strong>Prompt Engineer</strong>, I design and optimise prompts that reliably extract the best performance from LLMs:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Prompt Engineering</div>'+
+        '<div class="card-icon">'+ICONS.brain+'</div>'+
+        '<div class="card-title">What I Do</div>'+
+        '<div class="card-desc">'+
+        '<strong>System prompt design</strong> — Define AI persona, constraints, and behaviour<br><br>'+
+        '<strong>Chain-of-thought prompting</strong> — Reliable step-by-step reasoning chains<br><br>'+
+        '<strong>Few-shot examples</strong> — Guide model output with curated in-context examples<br><br>'+
+        '<strong>RAG prompts</strong> — Retrieval-augmented generation for knowledge-grounded responses<br><br>'+
+        '<strong>Evaluation &amp; iteration</strong> — Benchmark and refine prompts for consistency and accuracy'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">GPT-4</span><span class="tag">Claude</span><span class="tag">Gemini</span><span class="tag">LLM Ops</span></div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:.875rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Session</button>'+
+        '</div>';
+}
+
+function generateCollaborationResponse(){
+    return '<p>I\'m very open to collaboration. Here\'s what that can look like:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="card-icon">'+ICONS.star+'</div>'+
+        '<div class="card-title">Collaboration Options</div>'+
+        '<div class="card-desc">'+
+        '<strong>Join your team</strong> — Work with your existing developers on specific modules or features<br><br>'+
+        '<strong>Technical co-founder</strong> — Partner on early-stage startups where I own the technical side<br><br>'+
+        '<strong>Sub-contracting</strong> — Agencies and developers can sub-contract technical work to me<br><br>'+
+        '<strong>Open-source contribution</strong> — Happy to collaborate on meaningful community projects'+
+        '</div>'+
+        '</div>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Discuss Collaboration</button>'+
+        '</div>';
+}
+
+function generatePaymentIntegrationResponse(){
+    return '<p>Payment integration is a core fintech speciality. Production experience with:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Fintech</div>'+
+        '<div class="card-icon">'+ICONS.bank+'</div>'+
+        '<div class="card-title">Payment Gateways &amp; Integrations</div>'+
+        '<div class="card-desc">'+
+        '<strong>Paystack</strong> — Nigerian &amp; African markets, card &amp; bank transfer<br><br>'+
+        '<strong>Flutterwave</strong> — Pan-African payment infrastructure<br><br>'+
+        '<strong>Stripe</strong> — International and global platforms<br><br>'+
+        '<strong>Custom banking APIs</strong> — Direct transfers, account verification, transaction management<br><br>'+
+        '<strong>Crypto payments</strong> — Wallet integration and on-chain transaction logic'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">Paystack</span><span class="tag">Flutterwave</span><span class="tag">Stripe</span><span class="tag">Banking APIs</span></div>'+
+        '</div>';
+}
+
+function generateSecurityResponse(){
+    return '<p>Security is built into every project I ship, not bolted on afterwards:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="card-icon">'+ICONS.key+'</div>'+
+        '<div class="card-title">Security Practices</div>'+
+        '<div class="card-desc">'+
+        '<strong>Auth:</strong> Secure password hashing (bcrypt), JWT, session management<br><br>'+
+        '<strong>Input validation:</strong> Server-side validation and sanitisation on all forms<br><br>'+
+        '<strong>SQL injection:</strong> ORM usage and parameterised queries throughout<br><br>'+
+        '<strong>HTTPS:</strong> SSL/TLS enforced on all production deployments<br><br>'+
+        '<strong>Secrets management:</strong> Environment variables, never hardcoded credentials'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">bcrypt</span><span class="tag">JWT</span><span class="tag">HTTPS</span><span class="tag">ORM</span></div>'+
+        '</div>';
+}
+
+function generatePortfolioSiteResponse(){
+    return 'This portfolio is built entirely with vanilla HTML, CSS, and JavaScript — no frameworks, no build tools, just clean hand-written code. It features a chat interface, EmailJS for contact and appointment emails, dark/light mode, appointment booking, and is fully responsive. I can build a similar interactive portfolio for you!'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Get Your Own Portfolio</button>'+
+        '</div>';
+}
+
+function generateOpenToLearnResponse(){
+    return 'Continuous learning is central to how I operate. Currently deepening expertise in <strong>LLM fine-tuning, RAG (Retrieval-Augmented Generation) systems, advanced data pipelines, TypeScript/Next.js, and AI agent workflows</strong>. The tech landscape evolves fast — staying current is non-negotiable.'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-quick="What are your skills?">'+ICONS.activity+' View My Skills</button>'+
+        '</div>';
+}
+
+function generateCryptoResponse(){
+    var p=portfolioData.projects.find(function(x){return x.category==='Crypto';});
+    return '<p>I\'ve built crypto-related platforms including automated trading bots and portfolio trackers. I can build crypto dashboards, DeFi integrations, and wallet-connected applications.</p>'+makeCard(p);
+}
+
+function generateEcommerceResponse(){
+    return '<p>I\'ve built e-commerce and marketplace features across multiple projects:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="card-icon">'+ICONS.chart+'</div>'+
+        '<div class="card-title">E-commerce Capabilities</div>'+
+        '<div class="card-desc">'+
+        '<strong>Product listings</strong> — Search, filter, categories, tags<br><br>'+
+        '<strong>Cart &amp; checkout</strong> — Session-based and user-account carts<br><br>'+
+        '<strong>Payment integration</strong> — Paystack, Flutterwave, Stripe<br><br>'+
+        '<strong>Order management</strong> — Status tracking, history, invoicing<br><br>'+
+        '<strong>Vendor rewards</strong> — Custom commission and incentive systems (see B&amp;G Homes)'+
+        '</div>'+
+        '</div>'+
+        '<div class="quick-actions">'+
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' See Projects</button>'+
+        '</div>';
+}
+
+function generateDeploymentResponse(){
+    return '<p>I handle full deployment from development to live production:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">DevOps / Hosting</div>'+
+        '<div class="card-icon">'+ICONS.zap+'</div>'+
+        '<div class="card-title">Deployment &amp; Hosting</div>'+
+        '<div class="card-desc">'+
+        '<strong>Render</strong> — Flask/Django apps (Uthao, Crypto Bots)<br><br>'+
+        '<strong>42web / InfinityFree</strong> — PHP production hosting (NewGenGlob, Trading Remedy)<br><br>'+
+        '<strong>Netlify / Vercel</strong> — Static sites and frontend deployments<br><br>'+
+        '<strong>VPS (cPanel/WHM)</strong> — Full server management for enterprise clients<br><br>'+
+        '<strong>GitHub Actions</strong> — Basic CI/CD pipeline automation'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">Render</span><span class="tag">cPanel</span><span class="tag">VPS</span><span class="tag">Netlify</span></div>'+
+        '</div>';
+}
+
+function generateCollegeResponse(){
+    return 'I\'m self-taught with structured professional development at <strong>New Horizon Computer Learning Center</strong> — one of the leading IT institutions in Nigeria. My real education came from <strong>building 100+ real-world projects</strong> and teaching others, which forces the deepest level of understanding.'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-quick="Tell me about your experience">'+ICONS.zap+' My Experience</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your teaching experience">'+ICONS.zap+' Teaching</button>'+
+        '</div>';
+}
+
+function generateHobbiesResponse(){
+    return 'Beyond code, I\'m passionate about <strong>teaching technology</strong> and breaking complex ideas into concepts anyone can grasp. I enjoy exploring new AI tools, contributing to open source, and building side projects that solve real problems. The intersection of AI and everyday life genuinely excites me.'+
+        '<div class="quick-actions" style="margin-top:.75rem;">'+
+        '<button class="quick-btn" data-quick="Tell me about your teaching experience">'+ICONS.zap+' Teaching</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Work</button>'+
+        '</div>';
+}
+
+function generateAPIResponse(){
+    return '<p>I design and build clean, well-documented RESTful APIs. Here\'s what I cover:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">API Development</div>'+
+        '<div class="card-icon">'+ICONS.zap+'</div>'+
+        '<div class="card-title">REST API Expertise</div>'+
+        '<div class="card-desc">'+
+        '<strong>Design:</strong> RESTful architecture, versioning, proper HTTP status codes<br><br>'+
+        '<strong>Auth:</strong> JWT tokens, OAuth2 flows, API key management<br><br>'+
+        '<strong>Documentation:</strong> Swagger/OpenAPI docs for client teams<br><br>'+
+        '<strong>Integrations:</strong> Payment gateways, shipping APIs, AI APIs, SMS/email providers<br><br>'+
+        '<strong>Performance:</strong> Rate limiting, caching, pagination'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">REST</span><span class="tag">JWT</span><span class="tag">Flask</span><span class="tag">Django REST</span></div>'+
+        '</div>';
+}
+
+function generateFrontendResponse(){
+    return '<p>My frontend stack:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Frontend</div>'+
+        '<div class="card-icon">'+ICONS.monitor+'</div>'+
+        '<div class="card-title">Frontend Technologies</div>'+
+        '<div class="card-desc">'+
+        '<strong>Languages:</strong> HTML5, CSS3, JavaScript (ES6+)<br><br>'+
+        '<strong>Frameworks/Libraries:</strong> React, Vanilla JS, Jinja2 templates<br><br>'+
+        '<strong>Styling:</strong> Tailwind CSS, Bootstrap, custom CSS animations, responsive design<br><br>'+
+        '<strong>Tools:</strong> Git, VS Code, Figma references, browser DevTools'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">React</span><span class="tag">JavaScript</span><span class="tag">Tailwind</span><span class="tag">Responsive</span></div>'+
+        '</div>';
+}
+
+function generateBackendResponse(){
+    return '<p>My backend expertise:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Backend</div>'+
+        '<div class="card-icon">'+ICONS.zap+'</div>'+
+        '<div class="card-title">Backend Technologies</div>'+
+        '<div class="card-desc">'+
+        '<strong>Languages:</strong> Python, PHP, JavaScript (Node basics)<br><br>'+
+        '<strong>Frameworks:</strong> Flask, Django, basic Express<br><br>'+
+        '<strong>Databases:</strong> MySQL, PostgreSQL, SQLite, SQLAlchemy ORM<br><br>'+
+        '<strong>Auth:</strong> JWT, session-based, Flask-Login, Django auth<br><br>'+
+        '<strong>APIs:</strong> RESTful API design, third-party integrations, webhooks'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">Python</span><span class="tag">Flask</span><span class="tag">Django</span><span class="tag">PHP</span><span class="tag">REST APIs</span></div>'+
+        '</div>';
+}
+
+function generateDatabaseResponse(){
+    return '<p>My database design expertise:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Database</div>'+
+        '<div class="card-icon">'+ICONS.building+'</div>'+
+        '<div class="card-title">Database Skills</div>'+
+        '<div class="card-desc">'+
+        '<strong>MySQL</strong> — Primary DB for most PHP and Flask projects<br><br>'+
+        '<strong>PostgreSQL</strong> — Enterprise-grade, used in production fintech apps<br><br>'+
+        '<strong>SQLite</strong> — Lightweight, perfect for MVPs and desktop apps<br><br>'+
+        '<strong>SQLAlchemy ORM</strong> — Python-native DB interaction<br><br>'+
+        '<strong>Schema design</strong> — Normalization, indexing, migrations, performance tuning'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">MySQL</span><span class="tag">PostgreSQL</span><span class="tag">SQLite</span><span class="tag">SQLAlchemy</span></div>'+
+        '</div>';
+}
+
+function generateToolsResponse(){
+    return '<p>My daily development toolkit:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Daily Tools</div>'+
+        '<div class="card-icon">'+ICONS.zap+'</div>'+
+        '<div class="card-title">Tools &amp; Workflow</div>'+
+        '<div class="card-desc">'+
+        '<strong>Editor:</strong> VS Code (primary), PyCharm (Python-heavy projects)<br><br>'+
+        '<strong>Version Control:</strong> Git + GitHub — every project is versioned<br><br>'+
+        '<strong>Design:</strong> Figma for UI references, browser DevTools for live tweaks<br><br>'+
+        '<strong>Testing:</strong> Postman for API testing, pytest for Python unit tests<br><br>'+
+        '<strong>AI Tools:</strong> ChatGPT, Claude, Gemini for prompt work and code review<br><br>'+
+        '<strong>Communication:</strong> Slack, WhatsApp, email — responsive across all channels'+
+        '</div>'+
+        '</div>';
+}
+
+function generateMobileAppResponse(){
+    return '<p>For cross-platform apps, I use <strong>Kivy and KivyMD</strong> — Python that compiles to Android, iOS, Windows, Linux, and macOS from one codebase:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Mobile / Desktop</div>'+
+        '<div class="card-icon">'+ICONS.monitor+'</div>'+
+        '<div class="card-title">Cross-Platform Development</div>'+
+        '<div class="card-desc">Built multiple desktop and mobile apps with Kivy/KivyMD. A single Python codebase runs everywhere — Windows, Linux, macOS, and Android. Rapid development, shared business logic, consistent UX across all platforms.</div>'+
+        '<div class="card-tags"><span class="tag">Kivy</span><span class="tag">KivyMD</span><span class="tag">Android</span><span class="tag">Windows</span><span class="tag">Python</span></div>'+
+        '</div>';
+}
+
+function generateScrapingUseCaseResponse(){
+    return '<p>Web scraping powers many business solutions I\'ve built:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Automation</div>'+
+        '<div class="card-icon">'+ICONS.bot+'</div>'+
+        '<div class="card-title">Web Scraping Use Cases</div>'+
+        '<div class="card-desc">'+
+        '<strong>Price monitoring</strong> — Track competitor pricing across e-commerce sites<br><br>'+
+        '<strong>Lead generation</strong> — Extract business contacts from directories<br><br>'+
+        '<strong>News aggregation</strong> — Multi-source article feeds<br><br>'+
+        '<strong>Real estate data</strong> — Property listing collection and analysis<br><br>'+
+        '<strong>Market research</strong> — Structured data for dashboards and reports'+
+        '</div>'+
+        '<div class="card-tags"><span class="tag">Selenium</span><span class="tag">BeautifulSoup</span><span class="tag">Scrapy</span><span class="tag">Requests</span></div>'+
+        '</div>';
+}
+
+function generateTwitterResponse(){
+    return 'Follow me on X (Twitter) for dev insights, AI tips, and project updates:'+
+        '<div class="social-links" style="margin-top:.75rem;">'+
+        '<a href="https://x.com/kingswitnexxtra" target="_blank" rel="noopener" class="social-link">'+ICONS.twitter+' @kingswitnexxtra</a>'+
+        '</div>';
+}
+
+function generateOpenSourceResponse(){
+    return '<p>I believe in giving back to the developer community. My current open-source contribution:</p>'+
+        '<div class="card" style="margin-top:.75rem;max-width:520px;">'+
+        '<div class="project-category">Open Source</div>'+
+        '<div class="card-icon">'+ICONS.python+'</div>'+
+        '<div class="card-title">flask-smartflash</div>'+
+        '<div class="card-desc">A smart Flask extension for flash messages with categories, auto-dismiss, toast notifications, and fully customizable styling. Used by Flask developers worldwide to simplify user feedback.</div>'+
+        '<div class="card-tags"><span class="tag">Flask</span><span class="tag">Python</span><span class="tag">PyPI</span><span class="tag">Open Source</span></div>'+
+        '</div>'+
+        '<div class="quick-actions" style="margin-top:.875rem;">'+
+        '<button class="quick-btn" data-quick="Tell me about flask-smartflash">'+ICONS.package+' More Details</button>'+
+        '<button class="quick-btn" data-quick="What is your GitHub?">'+ICONS.github+' GitHub</button>'+
+        '</div>';
+}
+
+// ─── Intent matching ───────────────────────────────────────────────────────────
+function matchIntent(input){
+    var t=input.toLowerCase().trim();
+    if(/^(hi+|hey+|hello+|howdy|yo+|sup|good\s?(morning|afternoon|evening|day)|greetings|hiya|what'?s\s?up|how are you|how r u|wassup|wazzup|ola|hola|hi there|hey there|morning|afternoon|howzit|long time|good to meet)/.test(t)) return 'greeting';
+    if(/available|open.for.work|hire|hiring|freelance|looking for|open.to.work|take on|new.project|for.hire|work.with.you|are you free|can i hire|need a developer|looking for.dev/.test(t)) return 'availability';
+    if(/where.are you|location|country|nigeria|remote|based|timezone|time.zone|where.do you live|where.are.you.from|work online|work.remotely|work from|distance/.test(t)) return 'location';
+    if(/price|pricing|rate|cost|charge|how much|budget|quote|fee|payment plan|afford|expensive|cheap|cost.to.build|what.do.you.charge|your.rates|per hour|per project/.test(t)) return 'pricing';
+    if(/how long|timeline|deadline|turnaround|delivery|when can|how fast|quickly|rush|duration|time.to.build|how many.days|how many.weeks/.test(t)) return 'timeline';
+    if(/nda|confidential|secret|private.project|sign.an|non.disclosure|agreement|keep.it.private|can.you.keep/.test(t)) return 'nda';
+    if(/why.hire|why.choose|why.work.with|what.makes.you|stand.out|different|unique|strength|best.developer|over.other|why.you|reason.to.hire/.test(t)) return 'whyhire';
+    if(/testimon|review|feedback|client.say|reference|past.client|recommendation|what.do.clients|rating|stars|satisfied/.test(t)) return 'testimonials';
+    if(/teach|instructor|student|training|class|course|new.horizon|lecture|education|mentor|ms.word|excel|powerpoint|office.tool|digital.market|computer.funda|do you teach|can you teach/.test(t)) return 'teaching';
+    if(/college|university|degree|school|certif|self.taught|qualification|study|academic|where.did.you.study|formal.education/.test(t)) return 'college';
+    if(/hobby|hobbies|outside.work|personal.interest|fun|passion|free.time|when not coding|what.do.you.do.for.fun/.test(t)) return 'hobbies';
+    if(/annot|label|rlhf|dataset|nlp|ml.data|training.data|data.label|data.tag|classify.data|data.for.ai/.test(t)) return 'annotation';
+    if(/prompt.engineer|what is prompt|how.do.you.prompt|prompt.design|prompt.optim|chain.of.thought|few.shot|system.prompt|llm.prompt|write.prompts/.test(t)) return 'promptengineering';
+    if(/consult|ai.service|ai.integrat|llm|gpt|claude|gemini|ai.strateg|ai.workflow|ai.automat|ai.consulting|build.ai|add.ai|integrate.ai|use.ai|chatbot.for|ai.for.my/.test(t)) return 'consulting';
+    if(/book|appointment|schedule|meeting|call|slot|calendar|set up.a.call|talk to you|speak with|zoom|google.meet/.test(t)) return 'appointment';
+    if(/flask.or.django|django.or.flask|flask.vs.django|which.framework|do you use.django|do you know.django/.test(t)) return 'django';
+    if(/pypi|flask.smartflash|smartflash|package|open.source.package|your.library|your.package/.test(t)) return 'pypi';
+    if(/open.source|github.project|public.repo|contribute|foss/.test(t)) return 'opensource';
+    if(/frontend|front.end|html|css|react|tailwind|ui.build|design.skill|your.designs/.test(t)) return 'frontend';
+    if(/backend|back.end|server side|api.skill|php.skill|server.code/.test(t)) return 'backend';
+    if(/database|mysql|postgresql|sqlite|sql skill|orm|sqlalchemy|db.design|schema|data.storage/.test(t)) return 'database';
+    if(/deploy|hosting|server setup|render.com|cloud host|vercel|netlify|vps|cpanel|devops|ci.cd|go.live|publish.app|launch.app/.test(t)) return 'deployment';
+    if(/build.an.api|create.api|api.development|api.integration|rest.api.build|api.for/.test(t)) return 'apibuilding';
+    if(/security|secure|hack|vulnerab|protect|ssl|https|auth|password.hash|injection|xss/.test(t)) return 'security';
+    if(/scrap.use.case|what.can.you.scrap|scraping.for|scraping.project|price.monitor|lead.gen|extract.data.from/.test(t)) return 'scrapingusecase';
+    if(/scrap|selenium|beautifulsoup|pandas|numpy|data.analy|kivy|kivymd|cross.platform|automation.script|matplotlib|data.science/.test(t)) return 'scrapingdata';
+    if(/mobile.app|android.app|python.app|gui.app|kivy.framework|desktop.software|build.app/.test(t)) return 'mobileapp';
+    if(/payment.gateway|paystack|flutterwave|stripe|checkout|pay.integrat|billing.system|accept.payment/.test(t)) return 'paymentintegration';
+    if(/e.?commerce|online.shop|store|cart|product.listing|buy.online|sell.online|marketplace/.test(t)) return 'ecommerce';
+    if(/crypto|bitcoin|blockchain|defi|web3|nft|trading.bot|crypto.platform/.test(t)) return 'crypto';
+    if(/github|your.repo|your.code|git.profile|find.your.code/.test(t)) return 'github';
+    if(/linkedin|professional.profile|professional.network/.test(t)) return 'linkedin';
+    if(/twitter|x.com|tweet|social.media|follow.you/.test(t)) return 'twitter';
+    if(/tools|vs.code|vscode|ide|figma|postman|what.tools|software.you.use|dev.tools/.test(t)) return 'tools';
+    if(/process|how.do.we.start|how.does.it.work|workflow|steps|onboarding|kickoff|get.started/.test(t)) return 'process';
+    if(/maintain|maintenance|support.after|post.launch|bug.fix|update.app|long.term|ongoing|after.delivery/.test(t)) return 'maintenance';
+    if(/collaborat|team.up|work.together|partner|co.found|joint.project|join.my.team/.test(t)) return 'collaboration';
+    if(/this.website|this.portfolio|how.did.you.build.this|built.this.site|your.portfolio.site|this.chat/.test(t)) return 'portfoliosite';
+    if(/currently.learning|what.are.you.learning|improve|keep.up|stay.current|new.tech|future.skill|learning.now|next.skill/.test(t)) return 'opentolearn';
+    if(/real.estate|property|home|b.g|bghomes|realtor|housing/.test(t)) return 'realestate';
+    if(/ship|logistic|uthao|freight|cargo|container|ocean.freight/.test(t)) return 'logistics';
+    if(/bank|fintech|trading.platform|invest|newgenglob|tradingremedy/.test(t)) return 'fintech';
+    if(/about|who are you|introduce|yourself|bio|tell me more|what do you do|describe yourself/.test(t)) return 'about';
+    if(/project|portfolio|app|website|what.have.you.built|show me|past.work|what.did.you.build|your.work/.test(t)) return 'projects';
+    if(/skill|tech.stack|technology|language|framework|what.can.you.do|expertise|proficient|your.abilities/.test(t)) return 'skills';
+    if(/experience|job|career|work.history|company|employed|role|position|background|years.of/.test(t)) return 'experience';
+    if(/contact|email|reach|touch|message|get.in.touch|how.to.reach|email.address/.test(t)) return 'contact';
+    if(/help|what can you|guide|navigate|options|what.to.ask|what can i ask/.test(t)) return 'help';
+    return 'unknown';
+}
+
+function generateResponse(intent){
+    switch(intent){
+        case 'greeting':           return generateGreetingResponse();
+        case 'availability':       return generateAvailabilityResponse();
+        case 'location':           return generateLocationResponse();
+        case 'pricing':            return generatePricingResponse();
+        case 'timeline':           return generateTimelineResponse();
+        case 'nda':                return generateNDAResponse();
+        case 'whyhire':            return generateWhyHireResponse();
+        case 'testimonials':       return generateTestimonialsResponse();
+        case 'teaching':           return generateTeachingResponse();
+        case 'college':            return generateCollegeResponse();
+        case 'hobbies':            return generateHobbiesResponse();
+        case 'annotation':         return generateAnnotationResponse();
+        case 'promptengineering':  return generatePromptEngineeringResponse();
+        case 'consulting':         return generateConsultingResponse();
+        case 'appointment':        return generateAppointmentResponse();
+        case 'django':             return generateDjangoResponse();
+        case 'pypi':               return generatePypiResponse();
+        case 'opensource':         return generateOpenSourceResponse();
+        case 'frontend':           return generateFrontendResponse();
+        case 'backend':            return generateBackendResponse();
+        case 'database':           return generateDatabaseResponse();
+        case 'deployment':         return generateDeploymentResponse();
+        case 'apibuilding':        return generateAPIResponse();
+        case 'security':           return generateSecurityResponse();
+        case 'scrapingusecase':    return generateScrapingUseCaseResponse();
+        case 'scrapingdata':       return generateScrapingDataResponse();
+        case 'mobileapp':          return generateMobileAppResponse();
+        case 'paymentintegration': return generatePaymentIntegrationResponse();
+        case 'ecommerce':          return generateEcommerceResponse();
+        case 'crypto':             return generateCryptoResponse();
+        case 'github':             return generateGithubResponse();
+        case 'linkedin':           return generateLinkedInResponse();
+        case 'twitter':            return generateTwitterResponse();
+        case 'tools':              return generateToolsResponse();
+        case 'process':            return generateProcessResponse();
+        case 'maintenance':        return generateMaintenanceResponse();
+        case 'collaboration':      return generateCollaborationResponse();
+        case 'portfoliosite':      return generatePortfolioSiteResponse();
+        case 'opentolearn':        return generateOpenToLearnResponse();
+        case 'realestate':         return generateRealEstateResponse();
+        case 'logistics':          return generateLogisticsResponse();
+        case 'fintech':            return generateFintechResponse();
+        case 'about':              return generateAboutResponse();
+        case 'projects':           return generateProjectsResponse();
+        case 'skills':             return generateSkillsResponse();
+        case 'experience':         return generateExperienceResponse();
+        case 'contact':            return generateContactResponse();
+        case 'help':               return generateHelpResponse();
+        default:                   return generateUnknownResponse();
+    }
+}
+
+// ─── Send message ──────────────────────────────────────────────────────────────
+async function sendMessage(){
+    var text=chatInput.value.trim();
+    if(!text||isTyping) return;
+    addMessage(text,true);
+    chatInput.value=''; chatInput.style.height='auto';
+    isTyping=true; sendBtn.disabled=true;
+    await sleep(400); addThinking();
+    await sleep(800+Math.random()*600); removeThinking();
+    addTypingIndicator();
+    await sleep(600+Math.random()*400); removeTypingIndicator();
+    var intent=matchIntent(text);
+    var html=generateResponse(intent);
+    var isRich=/<(div|a|p|button|input|textarea)/.test(html);
+    var msgEl=addMessage('',false);
+    if(isRich){
+        msgEl.querySelector('.message-content').innerHTML=html;
+        animateSkillBars(); wireQuickBtns(msgEl);
+        var submitBtn=msgEl.querySelector('#submitContactBtn');
+        if(submitBtn) submitBtn.addEventListener('click',submitContact);
+    } else {
+        await typewriterEffect(msgEl,html);
+    }
+    isTyping=false; sendBtn.disabled=false; scrollToBottom();
+}
+function sendQuick(text){ chatInput.value=text; sendMessage(); }
+
+// ─── Contact form submit (EmailJS) ─────────────────────────────────────────────
+function submitContact(){
+    var name    = document.getElementById('contactName');
+    var email   = document.getElementById('contactEmail');
+    var subject = document.getElementById('contactSubject');
+    var message = document.getElementById('contactMessage');
+    var btn     = document.getElementById('submitContactBtn');
+    if(!name||!email||!message) return;
+    if(!name.value||!email.value||!message.value){
+        showToastIcon('warn', 'Please fill in all required fields', 2800);
+        return;
+    }
+
+    btn.disabled=true;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Sending...';
+
+    var subjectVal = subject ? (subject.value || 'Portfolio Contact') : 'Portfolio Contact';
+
+    // ── 1. Notify owner ──────────────────────────────────────────────────────
+    emailjs.send(EJS_SERVICE_ID, EJS_CONTACT_TPL, {
+        to_email:        OWNER_EMAIL,
+        subject:         'New message from ' + name.value + ' — Portfolio',
+        badge_label:     'New Message',
+        headline:        'You have a new message',
+        intro_line:      'Someone reached out through your portfolio. Details are below.',
+        sender_name:     name.value,
+        sender_email:    email.value,
+        contact_subject: subjectVal,
+        message:         message.value,
+        reply_to:        email.value,
+        cta_label:       'Reply to ' + name.value,
+        cta_url:         'mailto:' + email.value,
+        extra_block:     ''
+    })
+    .then(function(){
+        // ── 2. Confirm to sender ─────────────────────────────────────────────
+        return emailjs.send(EJS_SERVICE_ID, EJS_CONTACT_TPL, {
+            to_email:        email.value,
+            subject:         'Message received — Eze Goodness will be in touch',
+            badge_label:     'Message Received',
+            headline:        'Thanks for reaching out, ' + name.value + '!',
+            intro_line:      "I've received your message and will get back to you within 24\u201348 hours. Here\u2019s a copy of what you sent.",
+            sender_name:     name.value,
+            sender_email:    email.value,
+            contact_subject: subjectVal,
+            message:         message.value,
+            reply_to:        OWNER_EMAIL,
+            cta_label:       'Visit My Portfolio',
+            cta_url:         'https://switnex1.oneapp.dev',
+            // extra_block: sender gets a "explore my work" links panel
+            extra_block:
+                '<table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F8F6;border-radius:10px;border:1px solid #E5E7EB;margin-bottom:28px;">' +
+                '<tr><td style="padding:18px 22px;">' +
+                '<div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">While you wait — explore my work</div>' +
+                '<table cellpadding="0" cellspacing="0"><tr>' +
+                '<td style="padding-right:8px;"><a href="https://github.com/chimenmagoodness" style="display:inline-block;background:#1a1a2e;color:#fff;text-decoration:none;padding:9px 16px;border-radius:6px;font-size:12px;font-weight:600;">GitHub</a></td>' +
+                '<td style="padding-right:8px;"><a href="https://pypi.org/project/flask-smartflash/" style="display:inline-block;background:#006dad;color:#fff;text-decoration:none;padding:9px 16px;border-radius:6px;font-size:12px;font-weight:600;">PyPI Package</a></td>' +
+                '<td><a href="https://linkedin.com/in/goodness-eze" style="display:inline-block;background:#0077b5;color:#fff;text-decoration:none;padding:9px 16px;border-radius:6px;font-size:12px;font-weight:600;">LinkedIn</a></td>' +
+                '</tr></table>' +
+                '</td></tr></table>'
+        });
+    })
+    .then(function(){
+        showToastIcon('check', 'Message sent. A confirmation is on its way to your inbox.', 3800);
+        name.value=''; email.value='';
+        if(subject) subject.value='';
+        message.value='';
+        btn.disabled=false;
+        btn.innerHTML=ICONS.send+' Send Message';
+    })
+    .catch(function(err){
+        console.error('EmailJS contact error:', err);
+        showToastIcon('info', 'Message logged. Configure EmailJS keys to enable live delivery.', 3800);
+        name.value=''; email.value='';
+        if(subject) subject.value='';
+        message.value='';
+        btn.disabled=false;
+        btn.innerHTML=ICONS.send+' Send Message';
+    });
+}
+
+// ─── Appointment submit (EmailJS) ──────────────────────────────────────────────
+function submitAppointment(){
+    var name  = document.getElementById('apptName');
+    var email = document.getElementById('apptEmail');
+    var date  = document.getElementById('apptDate');
+    var note  = document.getElementById('apptNote');
+    var btn   = document.getElementById('submitAppt');
+    if(!name.value||!email.value||!date.value||!selectedTime){
+        showToastIcon('warn', 'Please fill in name, email, date, and select a time slot'); return;
+    }
+
+    btn.disabled=true;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Booking...';
+
+    var noteVal = note.value || 'No additional notes provided.';
+
+    // ── 1. Notify owner ──────────────────────────────────────────────────────
+    emailjs.send(EJS_SERVICE_ID, EJS_APPT_TPL, {
+        to_email:     OWNER_EMAIL,
+        subject:      'New appointment request — ' + selectedApptType + ' from ' + name.value,
+        badge_label:  'Appointment Request',
+        headline:     'New appointment request',
+        intro_line:   'A client has booked a session through your portfolio. Review the details and confirm.',
+        sender_name:  name.value,
+        sender_email: email.value,
+        appt_type:    selectedApptType,
+        appt_date:    date.value,
+        appt_time:    selectedTime,
+        appt_note:    noteVal,
+        reply_to:     email.value,
+        cta_label:    'Confirm Appointment',
+        cta_url:      'mailto:' + email.value,
+        cta2_label:   'Suggest Reschedule',
+        extra_block:  ''
+    })
+    .then(function(){
+        // ── 2. Confirm to client ─────────────────────────────────────────────
+        return emailjs.send(EJS_SERVICE_ID, EJS_APPT_TPL, {
+            to_email:     email.value,
+            subject:      'Appointment request received — Eze Goodness',
+            badge_label:  'Booking Confirmed',
+            headline:     'Your appointment is booked, ' + name.value + '!',
+            intro_line:   "Thank you for scheduling with me. I\u2019ve received your request and will send a calendar invite or meeting link within 24 hours.",
+            sender_name:  name.value,
+            sender_email: email.value,
+            appt_type:    selectedApptType,
+            appt_date:    date.value,
+            appt_time:    selectedTime,
+            appt_note:    noteVal,
+            reply_to:     OWNER_EMAIL,
+            cta_label:    'View My Portfolio',
+            cta_url:      'https://switnex1.oneapp.dev',
+            cta2_label:   'Request Reschedule',
+            // extra_block: client gets a "what happens next" steps panel
+            extra_block:
+                '<table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F8F6;border-radius:10px;border:1px solid #E5E7EB;margin-bottom:28px;">' +
+                '<tr><td style="padding:20px 22px;">' +
+                '<div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">What happens next</div>' +
+                '<table cellpadding="0" cellspacing="0" width="100%">' +
+                '<tr><td style="padding-bottom:12px;font-size:13px;color:#374151;line-height:1.6;">' +
+                '<span style="display:inline-block;width:22px;height:22px;background:#FFF3E0;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#FFA94D;margin-right:10px;">1</span>' +
+                "I'll review your request and send a calendar invite or meeting link within 24 hours." +
+                '</td></tr>' +
+                '<tr><td style="padding-bottom:12px;font-size:13px;color:#374151;line-height:1.6;">' +
+                '<span style="display:inline-block;width:22px;height:22px;background:#FFF3E0;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#FFA94D;margin-right:10px;">2</span>' +
+                'If your preferred slot is unavailable, I will suggest the next best time.' +
+                '</td></tr>' +
+                '<tr><td style="font-size:13px;color:#374151;line-height:1.6;">' +
+                '<span style="display:inline-block;width:22px;height:22px;background:#FFF3E0;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#FFA94D;margin-right:10px;">3</span>' +
+                'To cancel or reschedule, simply reply to this email.' +
+                '</td></tr>' +
+                '</table>' +
+                '</td></tr></table>'
+        });
+    })
+    .then(function(){
+        showToastIcon('calendar', 'Appointment booked. Check your inbox for a confirmation.', 3800);
+        name.value=''; email.value=''; date.value=''; note.value='';
+        selectedTime='';
+        document.querySelectorAll('.time-slot').forEach(function(s){ s.classList.remove('selected'); });
+        btn.disabled=false;
+        btn.innerHTML=ICONS.calendar+' Confirm Appointment';
+        closeApptModal();
+    })
+    .catch(function(err){
+        console.error('EmailJS appt error:', err);
+        showToastIcon('info', 'Appointment logged. Configure EmailJS keys to enable email confirmation.', 3800);
+        name.value=''; email.value=''; date.value=''; note.value='';
+        btn.disabled=false;
+        btn.innerHTML=ICONS.calendar+' Confirm Appointment';
+        closeApptModal();
+    });
+}
+
+// ─── Initial greeting ──────────────────────────────────────────────────────────
+async function initGreeting(){
+    var hour=new Date().getHours(), greeting=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+    var text=greeting+'! I\'m Goodness — a Full-Stack Developer, Prompt Engineer, AI Consultant, and Data Annotator based in Nigeria with 6+ years of experience and 100+ shipped projects. Whether you need a web app, AI integration, or are looking for a reliable dev partner — you\'re in the right place. What can I help you with?';
+    await sleep(500);
+    var msgEl=addMessage('',false);
+    await typewriterEffect(msgEl,text);
+    var div=document.createElement('div');
+    div.className='quick-actions'; div.style.marginTop='.75rem';
+    div.innerHTML=
+        '<button class="quick-btn" data-quick="Show me your projects">'+ICONS.monitor+' Projects</button>'+
+        '<button class="quick-btn" data-quick="Tell me about your AI consulting services">'+ICONS.brain+' AI Consulting</button>'+
+        '<button class="quick-btn" data-quick="Why should I hire you?">'+ICONS.star+' Why Hire Me</button>'+
+        '<button class="quick-btn" data-open-appt="1">'+ICONS.calendar+' Book a Call</button>'+
+        '<button class="quick-btn" data-quick="How to contact you?">'+ICONS.mail+' Contact</button>';
+    msgEl.querySelector('.message-content').appendChild(div);
+    wireQuickBtns(msgEl);
+}
+</script>
+</body>
+</html>
